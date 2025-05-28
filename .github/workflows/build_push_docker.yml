@@ -34,11 +34,14 @@ jobs:
               echo "POSTGRES_DB=grocerymate_db" >> .env
               echo "POSTGRES_HOST=localhost" >> .env
               echo "POSTGRES_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}" >> .env
+              mv .env backend/.env
 
           - name: 'Build Inventory Image'
             run: |
+              pwd 
               ls -a
               cd backend
+              pwd 
               ls -a
               docker build . --tag ghcr.io/jolewen/$IMAGE_NAME:$IMAGE_TAG
               docker push ghcr.io/jolewen/$IMAGE_NAME:$IMAGE_TAG
