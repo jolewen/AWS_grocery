@@ -12,6 +12,7 @@ on:
 jobs:
       push-store-image:
         runs-on: ubuntu-latest
+        environment: webstore-deployment
         env:
           IMAGE_NAME: grocery_webstore
           IMAGE_TAG: 1.0
@@ -39,6 +40,7 @@ jobs:
           - name: 'Build Inventory Image'
             run: |
               cd backend
+              cat .env
               docker build . --tag ghcr.io/jolewen/$IMAGE_NAME:$IMAGE_TAG
               docker push ghcr.io/jolewen/$IMAGE_NAME:$IMAGE_TAG
               rm .env
