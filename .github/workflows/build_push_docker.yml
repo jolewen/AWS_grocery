@@ -15,7 +15,7 @@ jobs:
         environment: webstore-deployment
         env:
           IMAGE_NAME: grocery_webstore
-          IMAGE_TAG: local
+          IMAGE_TAG: "1.0"
         steps:
           - name: 'Checkout GitHub Action'
             uses: actions/checkout@main
@@ -33,7 +33,7 @@ jobs:
               echo "POSTGRES_USER=grocery_user" >> .env
               echo "POSTGRES_PASSWORD=${{ secrets.PG_PWD }}" >> .env
               echo "POSTGRES_DB=grocerymate_db" >> .env
-              echo "POSTGRES_HOST=host.docker.internal" >> .env
+              echo "POSTGRES_HOST=localhost" >> .env
               echo "POSTGRES_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}" >> .env
               mv .env backend/.env
 
