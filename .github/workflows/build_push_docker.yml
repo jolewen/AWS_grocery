@@ -38,10 +38,7 @@ jobs:
 
           - name: 'Build Inventory Image'
             run: |
-              pwd 
-              ls -a
               cd backend
-              pwd 
-              ls -a
+              cat .env
               docker build . --tag ghcr.io/jolewen/$IMAGE_NAME:$IMAGE_TAG
               docker push ghcr.io/jolewen/$IMAGE_NAME:$IMAGE_TAG
