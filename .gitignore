@@ -1,4 +1,5 @@
 .idea/aws.xml
+.idea
 frontend/frontend-build.zip
 frontend/temp_extract/
 frontend/src/config.js~
