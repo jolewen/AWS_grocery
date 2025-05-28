@@ -29,5 +29,5 @@ jobs:
 
           - name: 'Build Inventory Image'
             run: |
-              docker build . --tag ghcr.io/$username/$IMAGE_NAME:$IMAGE_TAG
-              docker push ghcr.io/$username/$IMAGE_NAME:$IMAGE_TAG
+              docker build . --tag ghcr.io/jolewen/$IMAGE_NAME:$IMAGE_TAG
+              docker push ghcr.io/jolewen/$IMAGE_NAME:$IMAGE_TAG
