@@ -40,7 +40,6 @@ jobs:
           - name: 'Build Inventory Image'
             run: |
               cd backend
-              cat .env
               docker build . --tag ghcr.io/jolewen/$IMAGE_NAME:$IMAGE_TAG
               docker push ghcr.io/jolewen/$IMAGE_NAME:$IMAGE_TAG
               rm .env
