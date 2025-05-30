@@ -34,12 +34,13 @@ jobs:
               echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PWD }}" >> .env
               echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
               echo "POSTGRES_HOST=localhost" >> .env
-              echo "POSTGRES_URI=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PWD }}@$localhost:5432/${{ secrets.POSTGRES_DB }}" >> .env
+              echo "POSTGRES_URI=postgresql://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PWD }}@localhost:5432/${{ secrets.POSTGRES_DB }}" >> .env
               mv .env backend/.env
 
           - name: 'Build Inventory Image'
             run: |
               cd backend
               docker build . --tag ghcr.io/jolewen/$IMAGE_NAME:$IMAGE_TAG
+              docker rmi ghcr.io/jolewen/$IMAGE_NAME:$IMAGE_TAG
               docker push ghcr.io/jolewen/$IMAGE_NAME:$IMAGE_TAG
               rm .env
