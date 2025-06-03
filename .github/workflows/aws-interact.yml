@@ -13,7 +13,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4.1.0
         with:
           role-to-assume: arn:aws:iam::912405945745:role/GithubDeployer
-          role-session-name: "session-tags: ${{ github.job }} ${{ github.run_id }} ${{ github.actor }}"
+          role-session-name: ${{ github.actor }}@${{ github.run_id }}
           aws-region: eu-central-1
       - name: get instances
         run: |
