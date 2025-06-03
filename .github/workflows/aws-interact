@@ -1,0 +1,20 @@
+name: AWS example workflow
+on:
+  push
+
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
+jobs:
+  describe-ec2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4.1.0
+        with:
+          role-to-assume: arn:aws:iam::912405945745:role/GithubDeployer
+          role-session-name: test-session
+          aws-region: eu-central-1
+      - name: get instances
+        run: |
+          aws ec2 describe-instances
