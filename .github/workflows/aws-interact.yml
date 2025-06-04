@@ -4,11 +4,14 @@ on: workflow_dispatch
 permissions:
   id-token: write   # This is required for requesting the JWT
   # contents: read    # This is required for actions/checkout
+
 jobs:
   describe-ec2:
     runs-on: ubuntu-latest
     container:
       image: hashicorp/terraform:1.7.5
+      options: --workdir /github/workspace
+      
     steps:
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4.1.0
