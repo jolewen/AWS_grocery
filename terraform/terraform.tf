@@ -28,7 +28,7 @@ output "vpc_id" {
 
 resource "aws_instance" "double-up" {
   instance_type = "t2.micro"
-  launch_template = { 
-  id= lt-0568aae9bc6372ad5
+  launch_template { 
+  id = lt-0568aae9bc6372ad5
   }
 }
