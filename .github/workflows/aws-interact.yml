@@ -1,0 +1,26 @@
+name: AWS example workflow
+on: workflow_dispatch
+
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  # contents: read    # This is required for actions/checkout
+jobs:
+  describe-ec2:
+    runs-on: ubuntu-latest
+    container:
+      image: hashicorp/terraform:1.7.5
+    steps:
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v4.1.0
+        with:
+          role-to-assume: arn:aws:iam::912405945745:role/GithubDeployer
+          role-session-name: ${{ github.actor }}@${{ github.run_id }}
+          aws-region: eu-central-1
+      
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./terraform/terraform.tf
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        working-directory: ./terraform/terraform.tf
