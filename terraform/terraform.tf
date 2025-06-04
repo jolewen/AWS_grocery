@@ -16,7 +16,6 @@ terraform {
 
 provider "aws" {
   region = "eu-central-1"
-  # No credentials here — picked up from GitHub OIDC env
 }
 
 resource "aws_vpc" "example" {
@@ -25,4 +24,11 @@ resource "aws_vpc" "example" {
 
 output "vpc_id" {
   value = aws_vpc.example.id
+}
+
+resource "aws_instance" "double-up" {
+  instance_type = "t2.micro"
+  launch_template = { 
+  id= lt-0568aae9bc6372ad5
+  }
 }
