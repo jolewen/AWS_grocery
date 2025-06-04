@@ -1,6 +1,5 @@
 name: AWS example workflow
-on:
-  push
+on: workflow_dispatch
 
 permissions:
   id-token: write   # This is required for requesting the JWT
@@ -8,6 +7,8 @@ permissions:
 jobs:
   describe-ec2:
     runs-on: ubuntu-latest
+    container:
+      image: hashicorp/terraform:1.7.5
     steps:
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4.1.0
@@ -15,6 +16,11 @@ jobs:
           role-to-assume: arn:aws:iam::912405945745:role/GithubDeployer
           role-session-name: ${{ github.actor }}@${{ github.run_id }}
           aws-region: eu-central-1
-      - name: get instances
-        run: |
-          aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId, PublicIpAddress]'
+      
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./path/to/terraform
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        working-directory: ./path/to/terraform
