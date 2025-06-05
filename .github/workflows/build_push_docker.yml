@@ -11,10 +11,10 @@ jobs:
         environment: webstore-deployment
         env:
           IMAGE_NAME: grocery_webstore
-          IMAGE_TAG: localhost
+          IMAGE_TAG: latest
           POSTGRES_PWD: ${{ secrets.POSTGRES_PWD }}
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_HOST: localhost
+          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         steps:
           - name: 'Checkout GitHub Action'
