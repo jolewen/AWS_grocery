@@ -1,6 +1,7 @@
 CREATE DATABASE grocerymate_db;
-CREATE USER grocery_user WITH ENCRYPTED PASSWORD 'grocery_test';
+CREATE USER grocery_user WITH ENCRYPTED PASSWORD ${PG_USER_PWD};
 
+\c grocerymate_db
 GRANT USAGE, CREATE ON SCHEMA public TO grocery_user;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO grocery_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO grocery_user;
