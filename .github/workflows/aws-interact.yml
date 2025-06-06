@@ -26,7 +26,18 @@ jobs:
       - name: Terraform Init
         run: terraform init
         working-directory: terraform/
+      
+      - name: Terraform Plan
+        run: terraform plan
+        working-directory: terraform/
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
         working-directory: terraform/
+
+      - name: Install PSQL
+        run: sudo yum install -y postgresql15
+
+      - name: Setup RDS PostgeSQL
+        run: |
+          psql -h <hostname> -u -c "CREATE USER grocery_user WITH ENCRYPTED PASSWORD;"
