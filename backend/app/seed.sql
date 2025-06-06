@@ -1,0 +1,11 @@
+CREATE DATABASE grocerymate_db;
+CREATE USER grocery_user WITH ENCRYPTED PASSWORD 'grocery_test';
+
+GRANT USAGE, CREATE ON SCHEMA public TO grocery_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO grocery_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO grocery_user;
+GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO grocery_user;
+
+-- Set default privileges for future objects
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO grocery_user;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO grocery_user;
