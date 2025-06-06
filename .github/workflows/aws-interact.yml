@@ -40,4 +40,5 @@ jobs:
 
       - name: Setup RDS PostgeSQL
         run: |
-          psql -h <hostname> -u -c "CREATE USER grocery_user WITH ENCRYPTED PASSWORD;"
+          psql -h <your-rds-endpoint> -f backend/app/seed.sql
+          psql -h <your-rds-endpoint> -U grocery_user -d grocerymate_db -f backend/app/sqlite_dump_clean.sql
