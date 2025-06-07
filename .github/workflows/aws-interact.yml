@@ -51,6 +51,7 @@ jobs:
         id: tf-output
         run: |
           terraform refresh
+          terraform state list
           terraform output
           DB_HOST=$(terraform output -raw db_endpoint)
           echo $DB_HOST
