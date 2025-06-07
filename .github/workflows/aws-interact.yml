@@ -18,7 +18,7 @@ jobs:
       TF_VAR_db_instance_class: "db.t3.micro"
       TF_VAR_db_allocated_storage: "20"
       TF_VAR_db_name: ${{ secrets.POSTGRES_DB }}
-      # TF_VAR_db_username: ${{ secrets.POSTGRES_USER }}
+      TF_VAR_db_username: ${{ secrets.POSTGRES_USER }}
       TF_VAR_db_password: ${{ secrets.POSTGRES_PWD }}
       TF_VAR_db_security_group_id: ${{ secrets.RDS_SG }}
       TF_VAR_db_subnet_group: ${{ secrets.PRIVATE_SUBNET_GROUP }}
