@@ -35,7 +35,7 @@ resource "aws_db_instance" "postgres" {
   allocated_storage       = var.db_allocated_storage
   db_name                 = var.db_name
   username                = "postgres"
-  password                = var.db_password
+  password                = "5bkKPpMWpHZbui6" # var.db_password
   publicly_accessible     = false
   skip_final_snapshot     = true
   delete_automated_backups = true
