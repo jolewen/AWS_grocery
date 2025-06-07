@@ -56,3 +56,4 @@ jobs:
           DB_HOST=$(terraform output -raw db_endpoint)
           echo $DB_HOST
           echo "POSTGRES_HOST=$DB_HOST" >> $GITHUB_ENV
+        working-directory: terraform/
