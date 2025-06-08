@@ -37,7 +37,7 @@ jobs:
               echo "POSTGRES_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PWD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}" >> .env
               mv .env backend/.env
 
-          - name: 'Build Inventory Image'
+          - name: 'Build Webstore Image'
             run: |
               cd backend
               docker build . --tag ghcr.io/jolewen/$IMAGE_NAME:$IMAGE_TAG

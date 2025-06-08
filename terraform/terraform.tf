@@ -18,11 +18,38 @@ provider "aws" {
   region = "eu-central-1"
 }
 
+resource "aws_security_group" "ec2_sg" {
+  name        = "ec2_sg"
+  description = "SG for EC2 instance"
+  vpc_id      = var.vpc_id
+}
+
+resource "aws_security_group" "rds_sg" {
+  name        = "rds_sg_2"
+  description = "SG for RDS, allowing only EC2 SG"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ec2_sg.id]
+    description     = "PostgreSQL from EC2"
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_instance" "webserver" {
   instance_type = "t2.micro"
   key_name = "webserver-private-pair"
-  launch_template { 
-  id = "lt-0568aae9bc6372ad5"
+  launch_template {
+  id = "lt-0996e9422ff7449f8"
   version = "$Latest"
   }
 }
