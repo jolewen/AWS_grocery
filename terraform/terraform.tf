@@ -71,7 +71,7 @@ resource "aws_instance" "webserver" {
   iam_instance_profile = "ec2-role-ssm"
   security_groups = ["ec2_sg"]
   launch_template {
-  id = "lt-0996e9422ff7449f8"
+  id = "lt-0568aae9bc6372ad5"
   version = "$Latest"
   }
 }
@@ -89,7 +89,7 @@ resource "aws_db_instance" "postgres" {
   skip_final_snapshot     = true
   delete_automated_backups = true
 
-  vpc_security_group_ids  = [var.db_security_group_id]
+  vpc_security_group_ids  = [aws_security_group.rds_sg.id]
   db_subnet_group_name    = var.db_subnet_group
   multi_az                = false
   storage_encrypted       = false
@@ -97,4 +97,13 @@ resource "aws_db_instance" "postgres" {
 
 output "db_endpoint" {
   value = aws_db_instance.postgres.endpoint
+}
+
+resource "aws_ssm_parameter" "pg_endpoint" {
+  name        = "/dev/webstore/pghost"
+  type        = "String"
+  value       = aws_db_instance.postgres.endpoint
+  lifecycle {
+    ignore_changes = [value]
+  }
 }
