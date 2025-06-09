@@ -24,11 +24,18 @@ resource "aws_security_group" "ec2_sg" {
   vpc_id      = var.vpc_id
 
   ingress {
-    protocol = "ssh"
+    protocol = "tcp"
     from_port = 22
     to_port = 22
     cidr_blocks = ["79.221.205.50/32", "0.0.0.0/0"]
   }
+  ingress {
+    protocol = "tcp"
+    from_port = 5001
+    to_port = 5001
+    cidr_blocks = ["79.221.205.50/32"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
