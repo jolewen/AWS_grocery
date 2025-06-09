@@ -6,7 +6,7 @@ permissions:
   # contents: read    # This is required for actions/checkout
 
 jobs:
-  describe-ec2:
+  build-aws-resources:
     runs-on: ubuntu-latest
     environment: webstore-deployment
     container:

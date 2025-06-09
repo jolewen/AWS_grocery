@@ -22,6 +22,19 @@ resource "aws_security_group" "ec2_sg" {
   name        = "ec2_sg"
   description = "SG for EC2 instance"
   vpc_id      = var.vpc_id
+
+  ingress {
+    protocol = "ssh"
+    from_port = 22
+    to_port = 22
+    cidr_blocks = ["79.221.205.50/32", "0.0.0.0/0"]
+  }
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 resource "aws_security_group" "rds_sg" {
@@ -48,6 +61,8 @@ resource "aws_security_group" "rds_sg" {
 resource "aws_instance" "webserver" {
   instance_type = "t2.micro"
   key_name = "webserver-private-pair"
+  iam_instance_profile = "ec2-role-ssm"
+  security_groups = ["ec2_sg"]
   launch_template {
   id = "lt-0996e9422ff7449f8"
   version = "$Latest"
