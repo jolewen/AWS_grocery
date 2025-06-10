@@ -45,7 +45,7 @@ resource "aws_security_group" "webstore_sg" {
 }
 
 resource "aws_security_group" "rds_sg" {
-  name        = "rds_sg_2"
+  name        = "rds_sg"
   description = "SG for RDS, allowing only EC2 SG"
   vpc_id      = var.vpc_id
 
