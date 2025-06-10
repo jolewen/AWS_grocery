@@ -53,7 +53,7 @@ resource "aws_security_group" "rds_sg" {
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
-    security_groups = [aws_security_group.webstore-sg.id]
+    security_groups = [aws_security_group.webstore_sg.id]
     description     = "PostgreSQL from EC2"
   }
 
@@ -69,7 +69,7 @@ resource "aws_instance" "webserver" {
   instance_type = "t2.micro"
   key_name = "webserver-private-pair"
   iam_instance_profile = "ec2-role-ssm"
-  security_groups = [aws_security_group.webstore-sg.id]
+  security_groups = [aws_security_group.webstore_sg.id]
   launch_template {
   id = "lt-0568aae9bc6372ad5"
   version = "$Latest"
@@ -86,9 +86,14 @@ resource "aws_db_instance" "postgres" {
   username                = var.db_username
   password                = var.db_password
   publicly_accessible     = false
+  # this demo should restore to the original state
+  # that's why it uses a static snapshot for initialization
+  # and skips storing any data updates
+  snapshot_identifier     = "webstore-db-20250610"
   skip_final_snapshot     = true
   delete_automated_backups = true
 
+  # Networking
   vpc_security_group_ids  = [aws_security_group.rds_sg.id]
   db_subnet_group_name    = var.db_subnet_group
   multi_az                = false
