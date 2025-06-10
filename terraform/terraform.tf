@@ -79,7 +79,7 @@ resource "aws_instance" "webserver" {
 resource "aws_db_instance" "postgres" {
   identifier              = var.db_identifier
   engine                  = "postgres"
-  engine_version          = "15"
+  engine_version          = "16"
   instance_class          = var.db_instance_class
   allocated_storage       = var.db_allocated_storage
   db_name                 = var.db_name
