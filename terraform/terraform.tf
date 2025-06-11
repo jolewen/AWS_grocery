@@ -27,7 +27,7 @@ resource "aws_security_group" "webstore_sg" {
     protocol = "tcp"
     from_port = 22
     to_port = 22
-    cidr_blocks = ["79.221.205.50/32", "0.0.0.0/0"]
+    cidr_blocks = ["79.221.205.50/32"]
   }
   ingress {
     protocol = "tcp"
@@ -65,10 +65,15 @@ resource "aws_security_group" "rds_sg" {
   }
 }
 
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "ec2_profile"
+  role = "ec2-role-ssm"
+}
+
 resource "aws_instance" "webserver" {
   instance_type = "t2.micro"
   key_name = "webserver-private-pair"
-  iam_instance_profile = "ec2-role-ssm"
+  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
   security_groups = [aws_security_group.webstore_sg.id]
   launch_template {
   id = "lt-0568aae9bc6372ad5"
