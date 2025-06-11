@@ -102,7 +102,7 @@ resource "aws_db_instance" "postgres" {
   vpc_security_group_ids  = [aws_security_group.rds_sg.id]
   db_subnet_group_name    = var.db_subnet_group
   multi_az                = false
-  storage_encrypted       = false
+  storage_encrypted       = true
 }
 
 output "db_endpoint" {
