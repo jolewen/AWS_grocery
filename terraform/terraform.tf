@@ -87,14 +87,14 @@ resource "aws_db_instance" "postgres" {
   engine_version          = "15.13"
   instance_class          = var.db_instance_class
   allocated_storage       = var.db_allocated_storage
-  # db_name                 = var.db_name
+  db_name                 = var.db_name
   username                = var.db_username
   password                = var.db_password
   publicly_accessible     = false
   # this demo should restore to the original state
   # that's why it uses a static snapshot for initialization
   # and skips storing any data updates
-  snapshot_identifier     = "webstore-db-20250610"
+  snapshot_identifier     = "webstore-pg-backup"
   skip_final_snapshot     = true
   delete_automated_backups = true
 
