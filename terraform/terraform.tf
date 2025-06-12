@@ -94,7 +94,7 @@ resource "aws_db_instance" "postgres" {
   # this demo should restore to the original state
   # that's why it uses a static snapshot for initialization
   # and skips storing any data updates
-  snapshot_identifier     = "webstore-pg-backup"
+  snapshot_identifier     = "webstore-pg"
   skip_final_snapshot     = true
   delete_automated_backups = true
 
