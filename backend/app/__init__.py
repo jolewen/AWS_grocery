@@ -54,8 +54,9 @@ class Config:
         """Check if 'postgres' resolves to a local Docker container."""
         return not cls.is_rds()
 
-    SQLALCHEMY_DATABASE_URI = (f"postgresql://**<masked-user>**:**<masked-password>**"
-                    f"@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}")
+    SQLALCHEMY_DATABASE_URI = POSTGRES_URI
+    SAVE_DB_URI= (f"postgresql://**<masked-user>**:**<masked-password>**"
+                  f"@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=4)
@@ -68,7 +69,7 @@ def detect_environment():
         print("Running in Local Docker PostgreSQL")
     else:
         print("Could not detect database environment. Set POSTGRES_URI manually.")
-    print(f"Using Database: {Config.SQLALCHEMY_DATABASE_URI}")
+    print(f"Using Database: {Config.SAVE_DB_URI}")
 
 
 detect_environment()

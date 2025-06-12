@@ -5,7 +5,6 @@ env:
 
 on:
   - workflow_dispatch
-  - push
 
 jobs:
       push-store-image:
@@ -16,7 +15,6 @@ jobs:
           IMAGE_TAG: latest
           POSTGRES_PWD: ${{ secrets.POSTGRES_PWD }}
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         steps:
           - name: 'Checkout GitHub Action'
