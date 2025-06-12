@@ -27,13 +27,13 @@ resource "aws_security_group" "webstore_sg" {
     protocol = "tcp"
     from_port = 22
     to_port = 22
-    cidr_blocks = ["79.221.205.50/32"]
+    cidr_blocks = ["87.167.188.60/32"]
   }
   ingress {
     protocol = "tcp"
     from_port = 5001
     to_port = 5001
-    cidr_blocks = ["79.221.205.50/32"]
+    cidr_blocks = ["87.167.188.60/32"]
   }
 
   egress {
