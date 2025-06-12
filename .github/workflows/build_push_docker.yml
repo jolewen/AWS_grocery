@@ -3,7 +3,9 @@ name: Deploy Images to GHCR
 env:
   DOTNET_VERSION: '6.0.x'
 
-on: workflow_dispatch
+on:
+  - workflow_dispatch
+  - push
 
 jobs:
       push-store-image:
