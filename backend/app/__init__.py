@@ -30,16 +30,18 @@ GITHUB_RELEASE_URL = f"https://github.com/{GITHUB_USERNAME}/{REPO_NAME}/releases
 
 class Config:
     """App configuration variables."""
-    POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
-    POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
+    POSTGRES_USER = os.getenv("POSTGRES_USER", "<no_user_set>")
+    POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "<no_password_set>")
     POSTGRES_DB = os.getenv("POSTGRES_DB", "postgres")
-    POSTGRES_HOST = os.getenv("POSTGRES_HOST", "postgres")
+    POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
     POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
 
-    POSTGRES_URI = os.getenv("POSTGRES_URI", "postgresql://postgres:postgres@localhost:5432/postgres")
+    POSTGRES_URI = (f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}"
+                    f"@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}")
+    # POSTGRES_URI = os.getenv("POSTGRES_URI", "postgresql://postgres:postgres@localhost:5432/postgres")
 
-    if not POSTGRES_URI:
-        raise ValueError("POSTGRES_URI environment variable is not set.")
+    if POSTGRES_USER == "<no_user_set>" or POSTGRES_PASSWORD == "<no_password_set>":
+        raise ValueError("Environment is not set - provide env for user and pwd.")
 
     @classmethod
     def is_rds(cls):
@@ -53,8 +55,8 @@ class Config:
         return not cls.is_rds()
 
     SQLALCHEMY_DATABASE_URI = POSTGRES_URI
-    print(f"Using Database: {SQLALCHEMY_DATABASE_URI}")
-
+    SAVE_DB_URI= (f"postgresql://**<masked-user>**:**<masked-password>**"
+                  f"@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=4)
@@ -67,7 +69,7 @@ def detect_environment():
         print("Running in Local Docker PostgreSQL")
     else:
         print("Could not detect database environment. Set POSTGRES_URI manually.")
-    print(f"Using Database: {Config.SQLALCHEMY_DATABASE_URI}")
+    print(f"Using Database: {Config.SAVE_DB_URI}")
 
 
 detect_environment()

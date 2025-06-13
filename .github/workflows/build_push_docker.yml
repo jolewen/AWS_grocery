@@ -3,7 +3,8 @@ name: Deploy Images to GHCR
 env:
   DOTNET_VERSION: '6.0.x'
 
-on: workflow_dispatch
+on:
+  - workflow_dispatch
 
 jobs:
       push-store-image:
@@ -14,7 +15,6 @@ jobs:
           IMAGE_TAG: latest
           POSTGRES_PWD: ${{ secrets.POSTGRES_PWD }}
           POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
           POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         steps:
           - name: 'Checkout GitHub Action'
@@ -32,9 +32,7 @@ jobs:
               echo "JWT_SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_hex(32))')" >> .env
               echo "POSTGRES_USER=$POSTGRES_USER" >> .env
               echo "POSTGRES_PASSWORD=$POSTGRES_PWD" >> .env
-              echo "POSTGRES_DB=$POSTGRES_DB >> .env
-              echo "POSTGRES_HOST=$POSTGRES_HOST >> .env
-              echo "POSTGRES_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PWD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}" >> .env
+              echo "POSTGRES_DB=$POSTGRES_DB" >> .env
               mv .env backend/.env
 
           - name: 'Build Webstore Image'

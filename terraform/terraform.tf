@@ -27,13 +27,13 @@ resource "aws_security_group" "webstore_sg" {
     protocol = "tcp"
     from_port = 22
     to_port = 22
-    cidr_blocks = ["79.221.205.50/32"]
+    cidr_blocks = ["87.167.188.60/32"]
   }
   ingress {
     protocol = "tcp"
     from_port = 5001
     to_port = 5001
-    cidr_blocks = ["79.221.205.50/32"]
+    cidr_blocks = ["87.167.188.60/32"]
   }
 
   egress {
@@ -94,7 +94,7 @@ resource "aws_db_instance" "postgres" {
   # this demo should restore to the original state
   # that's why it uses a static snapshot for initialization
   # and skips storing any data updates
-  snapshot_identifier     = "webstore-pg-backup"
+  snapshot_identifier     = "webstore-pg"
   skip_final_snapshot     = true
   delete_automated_backups = true
 
