@@ -27,7 +27,20 @@ DEFAULT_AVATAR_LOCAL_PATH = os.path.join(UPLOAD_FOLDER, DEFAULT_AVATAR)
 def is_ec2_instance():
     """Detects if the script is running on an EC2 instance by checking instance metadata."""
     try:
-        response = requests.get("http://169.254.169.254/latest/meta-data/", timeout=0.1)
+        # Get IMDSv2 token
+        token = requests.put(
+            "http://169.254.169.254/latest/api/token",
+            headers={"X-aws-ec2-metadata-token-ttl-seconds": "60"},
+            timeout=0.1,
+        ).text
+
+        # Use token to access metadata
+        response = requests.get(
+            "http://169.254.169.254/latest/meta-data/",
+            headers={"X-aws-ec2-metadata-token": token},
+            timeout=0.1,
+        )
+
         return response.status_code == 200
     except requests.RequestException:
         return False
@@ -38,8 +51,16 @@ def get_s3_client():
     Returns an S3 client based on the storage option.
     """
     if USE_S3_STORAGE:
-        session = boto3.Session()
-        return session.client('s3', region_name=S3_REGION)
+        if is_ec2_instance():
+            session = boto3.Session()
+            return session.client('s3', region_name=S3_REGION)
+        return boto3.client(
+                's3',
+                region_name=S3_REGION,
+                aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+                aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+                aws_session_token=os.getenv('AWS_SESSION_TOKEN')
+            )
     return None
 
 
