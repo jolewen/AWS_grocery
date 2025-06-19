@@ -38,16 +38,8 @@ def get_s3_client():
     Returns an S3 client based on the storage option.
     """
     if USE_S3_STORAGE:
-        if is_ec2_instance():
-            session = boto3.Session()
-            return session.client('s3', region_name=S3_REGION)
-        return boto3.client(
-                's3',
-                region_name=S3_REGION,
-                aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-                aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-                aws_session_token=os.getenv('AWS_SESSION_TOKEN')
-            )
+        session = boto3.Session()
+        return session.client('s3', region_name=S3_REGION)
     return None
 
 
