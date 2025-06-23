@@ -13,7 +13,7 @@ jobs:
         env:
           IMAGE_NAME: grocery_webstore
           IMAGE_TAG: fargate
-          JW_SECRET_KEY: ${{ secrets.JW_SECRET_KEY }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
         steps:
           - name: 'Checkout GitHub Action'
             uses: actions/checkout@main
