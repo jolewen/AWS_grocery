@@ -1,10 +1,12 @@
-import logging
-import shutil
-import tempfile
-import zipfile
-from logging.handlers import RotatingFileHandler
 import os
-import socket
+import boto3
+import shutil
+import logging
+import zipfile
+import requests
+import tempfile
+
+from logging.handlers import RotatingFileHandler
 from flask import Flask, send_from_directory, render_template, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -13,7 +15,6 @@ from sqlalchemy import text
 from flask_migrate import Migrate
 from dotenv import load_dotenv
 from datetime import timedelta
-import requests
 from dateutil import parser
 
 load_dotenv()
@@ -26,50 +27,90 @@ FRONTEND_BUILD_ZIP = "frontend-build.zip"
 FRONTEND_BUILD_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../frontend/build"))
 TMP_ZIP_PATH = os.path.join(tempfile.gettempdir(), "frontend-build.zip")
 GITHUB_RELEASE_URL = f"https://github.com/{GITHUB_USERNAME}/{REPO_NAME}/releases/latest/download/{FRONTEND_BUILD_ZIP}"
+POSTGRES_ENV_VARS = {"POSTGRES_USER": "<no-user-found>",
+                     "POSTGRES_PASSWORD": ("<no-pwd-found>", "decrypt"),
+                     "POSTGRES_DB": "postgres",
+                     "POSTGRES_HOST": "localhost",
+                     "POSTGRES_PORT": 5432}
+SSM_PARAMS = {"POSTGRES_USER": "pguser",
+             "POSTGRES_PASSWORD": "pgpwd",
+             "POSTGRES_DB": "pgdb",
+             "POSTGRES_HOST": "pghost",
+             "POSTGRES_PORT": "pgport"}
+VARS_FROM = os.getenv("VARS_FROM")
 
 
 class Config:
     """App configuration variables."""
-    POSTGRES_USER = os.getenv("POSTGRES_USER", "<no_user_set>")
-    POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "<no_password_set>")
-    POSTGRES_DB = os.getenv("POSTGRES_DB", "postgres")
-    POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
-    POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
-
-    POSTGRES_URI = (f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}"
-                    f"@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}")
-    # POSTGRES_URI = os.getenv("POSTGRES_URI", "postgresql://postgres:postgres@localhost:5432/postgres")
-
-    if POSTGRES_USER == "<no_user_set>" or POSTGRES_PASSWORD == "<no_password_set>":
-        raise ValueError("Environment is not set - provide env for user and pwd.")
-
     @classmethod
-    def is_rds(cls):
+    def get_vars_from_ssm(cls, params: dict):
+        """Get environment variables from SSM parameter store."""
+        session = boto3.session.Session()#profile_name="default")
+        ssm = session.client("ssm", region_name="eu-central-1")
+        pg_creds = {}
+        for param_name in params:
+            decrypt = False
+            if isinstance(params[param_name], tuple):
+                decrypt = True
+            response = ssm.get_parameter(
+                Name=f'/dev/webstore/{SSM_PARAMS[param_name]}',
+                WithDecryption=decrypt
+            )
+            pg_creds[param_name] = response["Parameter"]["Value"]
+
+        return pg_creds
+
+    def determine_credentials(self, get_from: str = 'ssm'):
+        pg_creds = {}
+        if get_from == 'ssm':
+            return self.get_vars_from_ssm(POSTGRES_ENV_VARS)
+        else:
+            for var in POSTGRES_ENV_VARS:
+                if var in os.environ:
+                    pg_creds[var] = os.getenv(var, POSTGRES_ENV_VARS[var])
+            return pg_creds
+
+    def is_rds(self):
         """Check if using AWS RDS by detecting an external hostname."""
         rds_hostnames = ["rds.amazonaws.com", "amazonaws.com"]
-        return any(h in cls.POSTGRES_URI for h in rds_hostnames)
+        return any(h in self.POSTGRES_URI for h in rds_hostnames)
 
-    @classmethod
-    def is_local_postgres(cls):
+    def is_local_postgres(self):
         """Check if 'postgres' resolves to a local Docker container."""
-        return not cls.is_rds()
+        return not self.is_rds()
 
-    SQLALCHEMY_DATABASE_URI = POSTGRES_URI
-    SAVE_DB_URI= (f"postgresql://**<masked-user>**:**<masked-password>**"
-                  f"@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}")
+    def __init__(self):
+        pg_creds = self.determine_credentials(VARS_FROM)
+        self.user = pg_creds["POSTGRES_USER"]
+        self.password = pg_creds["POSTGRES_PASSWORD"]
+        self.host = pg_creds["POSTGRES_HOST"]
+        self.port = pg_creds["POSTGRES_PORT"]
+        self.db = pg_creds["POSTGRES_DB"]
+
+        self.POSTGRES_URI = (f"postgresql://{self.user}:{self.password}"
+                        f"@{self.host}:{self.port}/{self.db}")
+
+        if self.user == "<no-user-found>" or self.password == "<no-pwd-found>":
+            raise ValueError("Environment is not set - provide env for user and pwd.")
+
+        type(self).SQLALCHEMY_DATABASE_URI = self.POSTGRES_URI
+        type(self).SAVE_DB_URI = f"postgresql://**<masked-user>**:**<masked-password>**@{self.host}:{self.port}/{self.db}"
+
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=4)
 
 
 def detect_environment():
-    if Config.is_rds():
+    cf = Config()
+    if cf.is_rds():
         print("Running on AWS RDS (Production)")
-    elif Config.is_local_postgres():
+    elif cf.is_local_postgres():
         print("Running in Local Docker PostgreSQL")
     else:
         print("Could not detect database environment. Set POSTGRES_URI manually.")
-    print(f"Using Database: {Config.SAVE_DB_URI}")
+    print(f"Using Database: {cf.SAVE_DB_URI}")
 
 
 detect_environment()

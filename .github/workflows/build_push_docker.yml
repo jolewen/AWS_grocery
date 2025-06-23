@@ -12,10 +12,7 @@ jobs:
         environment: webstore-deployment
         env:
           IMAGE_NAME: grocery_webstore
-          IMAGE_TAG: latest
-          POSTGRES_PWD: ${{ secrets.POSTGRES_PWD }}
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          IMAGE_TAG: fargate
           JW_SECRET_KEY: ${{ secrets.JW_SECRET_KEY }}
         steps:
           - name: 'Checkout GitHub Action'
