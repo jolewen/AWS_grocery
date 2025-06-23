@@ -27,7 +27,7 @@ jobs:
               
           - name: 'Build .env File'
             run: |
-              echo "JWT_SECRET_KEY=$JW_SECRET_KEY" >> .env
+              echo "JWT_SECRET_KEY=$JWT_SECRET_KEY" >> .env
               mv .env backend/.env
 
           - name: 'Build Webstore Image'
