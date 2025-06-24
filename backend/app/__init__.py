@@ -30,11 +30,11 @@ FRONTEND_BUILD_PATH = os.path.abspath(
 TMP_ZIP_PATH = os.path.join(tempfile.gettempdir(), "frontend-build.zip")
 GITHUB_RELEASE_URL = f"https://github.com/{GITHUB_USERNAME}/{REPO_NAME}/releases/latest/download/{FRONTEND_BUILD_ZIP}"
 
-POSTGRES_ENV_VARS = {"POSTGRES_USER": "pguser",
-                     "POSTGRES_PASSWORD": ("pgpwd", "decrypt"),
-                     "POSTGRES_DB": "pgdb",
-                     "POSTGRES_HOST": "pghost",
-                     "POSTGRES_PORT": "pgport"}
+POSTGRES_ENV_VARS = {"POSTGRES_USER": ("pguser", False),
+                     "POSTGRES_PASSWORD": ("pgpwd", True),
+                     "POSTGRES_DB": ("pgdb", False),
+                     "POSTGRES_HOST": ("pghost", False),
+                     "POSTGRES_PORT": ("pgport", False)}
 
 VARS_FROM = 'ssm'
 

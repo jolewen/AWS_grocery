@@ -19,9 +19,9 @@ UPLOAD_FOLDER = os.path.abspath(UPLOAD_FOLDER)
 print(f"UPLOAD_FOLDER set to: {UPLOAD_FOLDER}")
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
-S3_ENV_VARS = {'S3_BUCKET_NAME': 's3_bucket_name',
-               'S3_REGION': 's3_region',
-               'USE_S3_STORAGE': "use_s3"}
+S3_ENV_VARS = {'S3_BUCKET_NAME': ('s3_bucket_name', False),
+               'S3_REGION': ('s3_region', False),
+               'USE_S3_STORAGE': ("use_s3", False)}
 s3_config_vars, _ = get_vars_from_ssm(S3_ENV_VARS)
 S3_REGION = s3_config_vars['S3_REGION'] if s3_config_vars['S3_REGION'] is not None else os.getenv('S3_REGION')
 S3_BUCKET = s3_config_vars['S3_BUCKET_NAME'] if s3_config_vars['S3_BUCKET_NAME'] is not None else os.getenv('S3_BUCKET_NAME')
