@@ -1,21 +1,22 @@
-import os
-import boto3
-import shutil
 import logging
-import zipfile
-import requests
+import os
+import shutil
 import tempfile
-
+import zipfile
+from datetime import timedelta
 from logging.handlers import RotatingFileHandler
+
+import requests
+from dateutil import parser
+from dotenv import load_dotenv
 from flask import Flask, send_from_directory, render_template, request
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
-from sqlalchemy import text
 from flask_migrate import Migrate
-from dotenv import load_dotenv
-from datetime import timedelta
-from dateutil import parser
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
+
+from .utils.aws_ssm import get_vars_from_ssm
 
 load_dotenv()
 db = SQLAlchemy()
@@ -24,46 +25,32 @@ DEPLOYMENT_ENV = os.getenv("DEPLOYMENT_ENV", "local")
 GITHUB_USERNAME = "AlejandroRomanIbanez"
 REPO_NAME = "AWS_grocery"
 FRONTEND_BUILD_ZIP = "frontend-build.zip"
-FRONTEND_BUILD_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../frontend/build"))
+FRONTEND_BUILD_PATH = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "../../frontend/build"))
 TMP_ZIP_PATH = os.path.join(tempfile.gettempdir(), "frontend-build.zip")
 GITHUB_RELEASE_URL = f"https://github.com/{GITHUB_USERNAME}/{REPO_NAME}/releases/latest/download/{FRONTEND_BUILD_ZIP}"
-POSTGRES_ENV_VARS = {"POSTGRES_USER": "<no-user-found>",
-                     "POSTGRES_PASSWORD": ("<no-pwd-found>", "decrypt"),
-                     "POSTGRES_DB": "postgres",
-                     "POSTGRES_HOST": "localhost",
-                     "POSTGRES_PORT": 5432}
-SSM_PARAMS = {"POSTGRES_USER": "pguser",
-             "POSTGRES_PASSWORD": "pgpwd",
-             "POSTGRES_DB": "pgdb",
-             "POSTGRES_HOST": "pghost",
-             "POSTGRES_PORT": "pgport"}
-VARS_FROM = os.getenv("VARS_FROM")
+
+POSTGRES_ENV_VARS = {"POSTGRES_USER": "pguser",
+                     "POSTGRES_PASSWORD": ("pgpwd", "decrypt"),
+                     "POSTGRES_DB": "pgdb",
+                     "POSTGRES_HOST": "pghost",
+                     "POSTGRES_PORT": "pgport"}
+
+VARS_FROM = 'ssm'
 
 
 class Config:
     """App configuration variables."""
-    @classmethod
-    def get_vars_from_ssm(cls, params: dict):
-        """Get environment variables from SSM parameter store."""
-        session = boto3.session.Session()#profile_name="default")
-        ssm = session.client("ssm", region_name="eu-central-1")
-        pg_creds = {}
-        for param_name in params:
-            decrypt = False
-            if isinstance(params[param_name], tuple):
-                decrypt = True
-            response = ssm.get_parameter(
-                Name=f'/dev/webstore/{SSM_PARAMS[param_name]}',
-                WithDecryption=decrypt
-            )
-            pg_creds[param_name] = response["Parameter"]["Value"]
-
-        return pg_creds
 
     def determine_credentials(self, get_from: str = 'ssm'):
+        """Determine db backend connection and credentials."""
         pg_creds = {}
         if get_from == 'ssm':
-            return self.get_vars_from_ssm(POSTGRES_ENV_VARS)
+            pg_creds, _all_creds_provided = get_vars_from_ssm(POSTGRES_ENV_VARS)
+            if _all_creds_provided:
+                return pg_creds
+            else:
+                return self.determine_credentials(get_from='')
         else:
             for var in POSTGRES_ENV_VARS:
                 if var in os.environ:
@@ -81,21 +68,23 @@ class Config:
 
     def __init__(self):
         pg_creds = self.determine_credentials(VARS_FROM)
-        self.user = pg_creds["POSTGRES_USER"]
-        self.password = pg_creds["POSTGRES_PASSWORD"]
+        self.db = pg_creds["POSTGRES_DB"]
         self.host = pg_creds["POSTGRES_HOST"]
         self.port = pg_creds["POSTGRES_PORT"]
-        self.db = pg_creds["POSTGRES_DB"]
+        self.user = pg_creds["POSTGRES_USER"]
+        self.password = pg_creds["POSTGRES_PASSWORD"]
 
         self.POSTGRES_URI = (f"postgresql://{self.user}:{self.password}"
-                        f"@{self.host}:{self.port}/{self.db}")
+                             f"@{self.host}:{self.port}/{self.db}")
 
-        if self.user == "<no-user-found>" or self.password == "<no-pwd-found>":
-            raise ValueError("Environment is not set - provide env for user and pwd.")
+        if self.user is None or self.password is None:
+            raise ValueError(
+                "Environment is not set - provide env for user and pwd.")
 
         type(self).SQLALCHEMY_DATABASE_URI = self.POSTGRES_URI
-        type(self).SAVE_DB_URI = f"postgresql://**<masked-user>**:**<masked-password>**@{self.host}:{self.port}/{self.db}"
-
+        type(self).SAVE_DB_URI = (
+            f"postgresql://**<masked-user>**:**<masked-password>**"
+            f"@{self.host}:{self.port}/{self.db}")
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
@@ -109,7 +98,8 @@ def detect_environment():
     elif cf.is_local_postgres():
         print("Running in Local Docker PostgreSQL")
     else:
-        print("Could not detect database environment. Set POSTGRES_URI manually.")
+        print(
+            "Could not detect database environment. Set POSTGRES_URI manually.")
     print(f"Using Database: {cf.SAVE_DB_URI}")
 
 
@@ -161,16 +151,19 @@ def fetch_frontend():
             os.makedirs(FRONTEND_BUILD_PATH)
 
             # Determine source of files
-            if os.path.exists(os.path.join(temp_extract_path, "build", "index.html")):
+            if os.path.exists(
+                    os.path.join(temp_extract_path, "build", "index.html")):
                 # Files are in a build subdirectory
                 source_dir = os.path.join(temp_extract_path, "build")
                 print("Found build directory in zip, using its contents")
             elif os.path.exists(os.path.join(temp_extract_path, "index.html")):
                 # Files are at root
                 source_dir = temp_extract_path
-                print("Found files at root of zip, moving them to build directory")
+                print(
+                    "Found files at root of zip, moving them to build directory")
             else:
-                raise Exception("Could not find index.html in the extracted content")
+                raise Exception(
+                    "Could not find index.html in the extracted content")
 
             # Copy everything to build directory
             for item in os.listdir(source_dir):
@@ -184,8 +177,10 @@ def fetch_frontend():
             print("Frontend files successfully moved to build directory")
 
             # Verify the build directory has expected files
-            if not os.path.exists(os.path.join(FRONTEND_BUILD_PATH, "index.html")):
-                raise Exception("Failed to find index.html in final build directory")
+            if not os.path.exists(
+                    os.path.join(FRONTEND_BUILD_PATH, "index.html")):
+                raise Exception(
+                    "Failed to find index.html in final build directory")
 
             # Clean up
             shutil.rmtree(temp_extract_path, ignore_errors=True)
@@ -193,7 +188,8 @@ def fetch_frontend():
 
             print("Frontend build downloaded and extracted successfully")
         else:
-            print(f"Failed to download frontend build. Status Code: {response.status_code}")
+            print(
+                f"Failed to download frontend build. Status Code: {response.status_code}")
     except Exception as e:
         print(f"Error fetching frontend: {e}")
         # Clean up on error
@@ -239,7 +235,8 @@ def create_app():
 
     app = Flask(__name__,
                 static_folder="../../frontend/build/static",
-                template_folder=os.path.join(os.path.dirname(__file__), "../../frontend/build"))
+                template_folder=os.path.join(os.path.dirname(__file__),
+                                             "../../frontend/build"))
     CORS(app, resources={r"/*": {"origins": "*"}})
     app.config.from_object(Config)
 
@@ -297,7 +294,8 @@ def setup_logging(app):
 
     log_file = 'logs/app.log'
 
-    file_handler = RotatingFileHandler(log_file, maxBytes=1024 * 1024, backupCount=5)
+    file_handler = RotatingFileHandler(log_file, maxBytes=1024 * 1024,
+                                       backupCount=5)
     file_handler.setLevel(logging.INFO)
 
     formatter = logging.Formatter(
