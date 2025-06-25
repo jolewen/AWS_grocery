@@ -1,4 +1,4 @@
-name: AWS example workflow
+name: AWS Deployment Workflow
 on:
   - workflow_dispatch
 
@@ -43,7 +43,7 @@ jobs:
         working-directory: terraform/
       
       - name: Terraform Plan
-        run: terraform plan -out
+        run: terraform plan
         working-directory: terraform/
 
       - name: Terraform Apply
