@@ -16,7 +16,7 @@ resource "aws_ssm_parameter" "pg_db" {
   }
 }
 
-resource "aws_ssm_parameter" "pg_db" {
+resource "aws_ssm_parameter" "pg_port" {
   name  = "/dev/webstore/pgport"
   type  = "String"
   value = 5432
