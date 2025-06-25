@@ -7,13 +7,13 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "terraform.bucket.jle"
-    key            = "grocerymate/terraform.tfstate"
-    region         = "eu-central-1"
-    encrypt        = true
+    bucket  = "terraform.bucket.jle"
+    key     = "grocerymate/terraform.tfstate"
+    region  = "eu-central-1"
+    encrypt = true
   }
 }
 
 provider "aws" {
-  region = "eu-central-1"
+  region = var.aws_region
 }
