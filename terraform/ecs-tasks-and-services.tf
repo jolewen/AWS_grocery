@@ -29,7 +29,7 @@ resource "aws_ecs_service" "grocerymate" {
   desired_count   = 1
 
   network_configuration {
-    subnets = [var.subnet_ids]
+    subnets = var.subnet_ids
     security_groups  = aws_security_group.webstore_sg.id
     assign_public_ip = true
   }
