@@ -16,6 +16,15 @@ resource "aws_ssm_parameter" "pg_db" {
   }
 }
 
+resource "aws_ssm_parameter" "pg_db" {
+  name  = "/dev/webstore/pgport"
+  type  = "String"
+  value = 5432
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+
 resource "aws_ssm_parameter" "pg_user" {
   name  = "/dev/webstore/pguser"
   type  = "String"
