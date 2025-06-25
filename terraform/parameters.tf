@@ -1,7 +1,9 @@
+locals {pghost=split(":", aws_db_instance.postgres.endpoint)[0]}
+
 resource "aws_ssm_parameter" "pg_endpoint" {
   name  = "/dev/webstore/pghost"
   type  = "String"
-  value = aws_db_instance.postgres.endpoint
+  value = local.pghost
   lifecycle {
     ignore_changes = [value]
   }
