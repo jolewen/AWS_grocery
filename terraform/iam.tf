@@ -10,8 +10,7 @@ data "aws_iam_policy_document" "ecs_assumed_role" {
 }
 
 data "aws_iam_policy_document" "ecs_task_execution_policy" {
-  statement
-  {
+  statement {
     effect = "Allow"
     actions = [
       "ssm:GetParameters",
