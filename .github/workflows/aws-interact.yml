@@ -1,6 +1,6 @@
 name: AWS Deployment Workflow
 on:
-  - workflow_dispatch
+  - push
 
 permissions:
   id-token: write   # This is required for requesting the JWT
