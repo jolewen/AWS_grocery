@@ -1,9 +1,3 @@
-resource "aws_iam_role" "ecs_task_execution" {
-  name               = "ecsTaskExecutionRole"
-  assume_role_policy = data.aws_iam_policy_document.ecs_assumed_role.json
-}
-
-
 data "aws_iam_policy_document" "ecs_assumed_role" {
   statement {
     effect = "Allow"
@@ -13,7 +7,9 @@ data "aws_iam_policy_document" "ecs_assumed_role" {
     }
     actions = ["sts:AssumeRole"]
   }
+}
 
+data "aws_iam_policy_document" "ecs_task_execution_policy" {
   statement
   {
     effect = "Allow"
@@ -50,8 +46,19 @@ data "aws_iam_policy_document" "ecs_assumed_role" {
   }
 }
 
+resource "aws_iam_role" "ecs_task_execution" {
+  name               = "ecsTaskExecutionRole"
+  assume_role_policy = data.aws_iam_policy_document.ecs_assumed_role.json
+}
 
 resource "aws_iam_role_policy_attachment" "ecs_execution_attach" {
   role       = aws_iam_role.ecs_task_execution.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_iam_role_policy" "ecs_task_permissions" {
+  name = "ecsTaskExecutionPolicy"
+  role = aws_iam_role.ecs_task_execution.id
+
+  policy = data.aws_iam_policy_document.ecs_task_execution_policy.json
 }
