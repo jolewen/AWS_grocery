@@ -6,3 +6,9 @@ variable "db_username" {}
 variable "db_password" {}
 variable "db_subnet_group" {}
 variable "vpc_id" {}
+variable "instance_type" {}
+# for the grocerymate webserver
+variable "aws_region" {}
+variable "subnet_ids" {
+  type = list(string)
+}

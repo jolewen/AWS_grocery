@@ -1,14 +1,16 @@
 import os
 import time
-from typing import List, Dict
 import boto3
-import requests
-from botocore.exceptions import NoCredentialsError
+
+from typing import List, Dict
 from flask import current_app
 from werkzeug.utils import secure_filename
+from botocore.exceptions import NoCredentialsError, ClientError
+
 from .. import db
 from ..models.user_model import User, BasketItem
 from ..models.product_model import Product
+from ..utils.aws_ssm import get_vars_from_ssm
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -16,38 +18,28 @@ UPLOAD_FOLDER = os.path.join(BASE_DIR, '..', 'avatar')
 UPLOAD_FOLDER = os.path.abspath(UPLOAD_FOLDER)
 print(f"UPLOAD_FOLDER set to: {UPLOAD_FOLDER}")
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-S3_BUCKET = os.getenv('S3_BUCKET_NAME')
-S3_REGION = os.getenv('S3_REGION')
-USE_S3_STORAGE = os.getenv("USE_S3_STORAGE", "false").lower() == "true"
+
+S3_ENV_VARS = {'S3_BUCKET_NAME': ('s3_bucket_name', False),
+               'S3_REGION': ('s3_region', False),
+               'USE_S3_STORAGE': ("use_s3", False)}
+s3_config_vars, _ = get_vars_from_ssm(S3_ENV_VARS)
+S3_REGION = s3_config_vars['S3_REGION'] if s3_config_vars['S3_REGION'] is not None else os.getenv('S3_REGION')
+S3_BUCKET = s3_config_vars['S3_BUCKET_NAME'] if s3_config_vars['S3_BUCKET_NAME'] is not None else os.getenv('S3_BUCKET_NAME')
+USE_S3_STORAGE = s3_config_vars['USE_S3_STORAGE'] if s3_config_vars['USE_S3_STORAGE'] is not None else os.getenv("USE_S3_STORAGE", "false").lower() == "true"
+
 DEFAULT_AVATAR = 'user_default.png'
 DEFAULT_AVATAR_S3_URL = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/avatars/{DEFAULT_AVATAR}"
 DEFAULT_AVATAR_LOCAL_PATH = os.path.join(UPLOAD_FOLDER, DEFAULT_AVATAR)
-
-
-def is_ec2_instance():
-    """Detects if the script is running on an EC2 instance by checking instance metadata."""
-    try:
-        response = requests.get("http://169.254.169.254/latest/meta-data/", timeout=0.1)
-        return response.status_code == 200
-    except requests.RequestException:
-        return False
 
 
 def get_s3_client():
     """
     Returns an S3 client based on the storage option.
     """
+
     if USE_S3_STORAGE:
-        if is_ec2_instance():
-            session = boto3.Session()
-            return session.client('s3', region_name=S3_REGION)
-        return boto3.client(
-                's3',
-                region_name=S3_REGION,
-                aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-                aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-                aws_session_token=os.getenv('AWS_SESSION_TOKEN')
-            )
+        session = boto3.Session()
+        return session.client('s3', region_name=S3_REGION)
     return None
 
 
