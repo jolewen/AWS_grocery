@@ -157,42 +157,77 @@ python3 run.py
 ```
 
 
-## ☁️ AWS Deployment
-The code has been containerized in a Dockerfile. The necessary infrastructure was is defined via terraform. 
-Image creation and storing in github container registry (ghcr.io) and app deployment to AWS is done via the provided Github actions.
-Follow the steps below:
 
-### Github IAM Role
-Deploying via Github actions needs read/write access to several AWS services, 
-among which are S3, ECS, IAM, RDS, SSM (Parameter Store).
+## ☁️ AWS Deployment
+This repo's version of grocerymate has been adapted to be deployed to AWS.
+To this end, a GitHub action will containerize the code as defined by the [Dockerfile](./backend/Dockerfile).
+The resulting image is stored in the GitHub container registry (ghcr.io).
+
+
+### 📋 Prerequisites
+All necessary infrastructure is defined via [terraform](./terraform). 
+Terraform is set up to use S3 as backend to store its state. Create the S3 bucket and [enter its name here](./terraform/providers.tf) under "backend".
+Deploying the grocerymate webstore needs a manual bootstrapping process to populate the RDS.
+
+
+### 🔄☁️ GitHub to AWS 
+Deploying via GitHub actions needs read/write access to several AWS services, 
+among which are S3, ECS, IAM, RDS, SSM (Parameter Store). 
 
 #### OpenID Connect Setup
-In order for Github (actions) to be allowed to interact with your AWS Account
+In order for GitHub (actions) to be allowed to interact with your AWS Account,
 the recommended way is to configure an "OpenID Connect (OIDC) identity provider (IdP) inside an AWS account, 
-[and] use IAM roles and short-term credentials, which removes the need for IAM user access keys" ([source: Github](https://docs.github.com/en/actions/concepts/security/about-security-hardening-with-openid-connect))
+[and] use IAM roles and short-term credentials, which removes the need for IAM user access keys" ([source: GitHub](https://docs.github.com/en/actions/concepts/security/about-security-hardening-with-openid-connect))
 
-Click this link and follow the instructions: [OpenID Connect: AWS-Github](https://aws.amazon.com/blogs/security/use-iam-roles-to-connect-github-actions-to-actions-in-aws/)
+Click this link and follow the instructions: [OpenID Connect: AWS-GitHub](https://aws.amazon.com/blogs/security/use-iam-roles-to-connect-github-actions-to-actions-in-aws/)
 
-#### Github Deployment Role Permissions
-Assuming you have set up Github to request a short-lived access token directly from the cloud provider (see above)
-you will have to assign permissions to your Github deployment role (Gdr).
-Which 
+#### 🧑‍🔧 GitHub Deployment Role Permissions
+Assuming you have set up GitHub to request a short-lived access token directly from the cloud provider (see above)
+you will have to assign permissions to your GitHub deployment role (Gdr). As already mentioned, several and widespread permissions have to be granted.
+For the purpose of this documentation, it is assumed that your GitHub is the representation of yourself when deploying infrastructure to AWS.
+Thus - even though it does not follow least-privilege - consider granting AdministratorAccess (*arn:aws:iam::aws:policy/AdministratorAccess*).
+
 
 ### 🔹 Database Backend Setup
-> Save your created credentials
+If you are deploying the app for the first time, you will not have a snapshot to restore the RDS databse from. 
+In this case, use a temporary EC2 instance and seed the db as described.
 
-#### Start RDS PostgreSQL
-> FILLME \
-> \# ensure that it's (only) accessible by your EC2 instances SG (see below)
+#### **Step by step - RDS seeding**:
+1. Boot up RDS with PostgreSQL version ~=15 on AWS - use the configuration in [terraform](./terraform/rds.tf) without restoring from a snapshot.
+2. Run an EC2 instance with the following user data (or install psql manually).
+  ```bash
+  sudo yum update -y
+  sudo yum install -y postgresql15
+  ```
+3. Log into the instance and use the commands above to setup the db as you would locally, but specify the RDS as host. Example:
+  ```bash
+  psql -h webstore-pg.czckmkgc6alw.eu-central-1.rds.amazonaws.com -U postgres -c "CREATE DATABASE grocerymate_db;"
+  ```
+4. Save your credentials (+ port & db name) to GitHub vars.
+5. Take an RDS snapshot.
+6. Enter the snapshot name into [terraform](./terraform/rds.tf).
+7. Tear down on AWS (e.g. EC2 & RDS).
 
-#### Seed the Database
-If you are setting up the app for the first time you will not have a snapshot to restore 
-the RDS databse from. In this case, use a temporary EC2 instance and seed the db 
-as described above. 
-Then create a snapshot of your db, so that you can safely terminate it (cost saving).
+#### RDS Configuration
+Terraform configures RDS and its related resources with the following
+* Private subnet deployment - no public access.
+* Accessible only by your app's SecurityGroup.
+* Single-Zone AZ deployment, due to recreation from snapshot.
 
-## Architecture
+
+### Deployment
+Before running the [GitHub action - "AWS Deployment Workflow"](./.github/workflows/aws-deployment.yml):
+Ensure that you have set all variables as GitHub variables / secrets and enabled the pipeline to access them.
+Variables needed:
+* POSTGRES_DB
+* POSTGRES_PORT
+* POSTGRES_USER
+* POSTGRES_PWD
+Also ensure to replace the VPC & subnet ids as well as the aws-region with the appropriate ones from your AWS account. 
+
+## Architecture Diagram
 ![Architecture Diagram.png](docs/Architecture%20Diagram.png)
+
 
 ## 📖 Usage
 
@@ -202,10 +237,7 @@ Then create a snapshot of your db, so that you can safely terminate it (cost sav
 - Manage favorites and shopping basket
 - Proceed through the checkout process
 
+
 ## 📜 License
 
 This project is licensed under the MIT License.
-
-
-
-
