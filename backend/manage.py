@@ -7,17 +7,17 @@ from app import create_app, db, Config
 app = create_app()
 migration = Migrate(app, db)
 
-POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
-POSTGRES_DB = os.getenv("POSTGRES_DB", "postgres")
-POSTGRES_HOST = os.getenv("POSTGRES_HOST", "localhost")
-POSTGRES_PORT = os.getenv("POSTGRES_PORT", "5432")
+POSTGRES_ENV_VARS = {"POSTGRES_USER": ("pguser", False),
+                     "POSTGRES_PASSWORD": ("pgpwd", True),
+                     "POSTGRES_DB": ("pgdb", False),
+                     "POSTGRES_HOST": ("pghost", False),
+                     "POSTGRES_PORT": ("pgport", False)}
 
-POSTGRES_URI = (f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}"
-                f"@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}")
-# POSTGRES_URI = os.getenv("POSTGRES_URI")
-IS_RDS = Config.is_rds()
+cf = Config()
+IS_RDS = cf.is_rds()
 IS_LOCAL = not IS_RDS
+
+POSTGRES_URI = cf.POSTGRES_URI
 
 MIGRATIONS_PATH = os.path.join(os.path.dirname(__file__), "migrations")
 
@@ -59,7 +59,7 @@ def run_migrations():
 def seed_database():
     """Seed the database, ensuring products are inserted before reviews."""
     if IS_LOCAL:
-        sql_file = "app/sqlite_dump_clean.sql"
+        sql_file = "db_backup/sqlite_dump_clean.sql"
         if os.path.exists(sql_file) and IS_LOCAL:
             print("📂 Seeding database with sqlite_dump_clean.sql...")
 

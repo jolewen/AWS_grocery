@@ -2,8 +2,8 @@ resource "aws_ecs_task_definition" "grocerymate_fargate" {
   family             = "grocerymate-fargate"
   requires_compatibilities = ["FARGATE"]
   network_mode       = "awsvpc"
-  cpu                = "1024"
-  memory             = "2048"
+  cpu                = "128"
+  memory             = "256"
   task_role_arn      = aws_iam_role.ecs_task_execution.arn
   execution_role_arn = aws_iam_role.ecs_task_execution.arn
 
@@ -27,7 +27,6 @@ resource "aws_ecs_task_definition" "grocerymate_fargate" {
       }
     }
   ])
-
 }
 
 resource "aws_cloudwatch_log_group" "grocerymate" {
