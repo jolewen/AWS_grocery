@@ -68,26 +68,13 @@ Ensure the following dependencies are available before running the application:
 - **🛠️ Git** – Version control system.
 - **☁️ AWS Account** - cloud infrastructure, providing RDS, ECS, S3 and Systems Manager
 
-## ⚙️ Installation
+## ⚙️ Installation (local)
 
 ### 🔹 Clone Repository
 
 ```sh
 git clone --branch main https://github.com/jolewen/AWS_grocery.git && cd AWS_grocery
 ```
-
-### 🔹 Database Backend Setup
-> Save your created credentials
-
-#### Start RDS PostgreSQL
-> FILLME \
-> \# ensure that it's (only) accessible by your EC2 instances SG (see below)
-
-#### Temporary EC2 connector
-> FILLME 
-> \# use this to populate your db with the following instructions
-> 
- 
 
 #### Configure PostgreSQL
 
@@ -149,7 +136,7 @@ python3 -c "import secrets; print(secrets.token_hex(32))"
 Update `.env`:
 
 ```sh
-nano .env
+vim .env
 ```
 
 Fill in the following information (make sure to replace the placeholders):
@@ -160,6 +147,7 @@ POSTGRES_USER = grocery_user
 POSTGRES_PASSWORD = <your_password>
 POSTGRES_DB = grocerymate_db
 POSTGRES_HOST = localhost
+POSTGRES_PORT = 5432
 POSTGRES_URI = postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}
 ```
 
@@ -169,22 +157,43 @@ POSTGRES_URI = postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOS
 python3 run.py
 ```
 
+
+## ☁️ AWS Deployment
+The code has been containerized in a Dockerfile. The necessary infrastructure was is defined via terraform. 
+Image creation and storing in github container registry (ghcr.io) and app deployment to AWS is done via the provided Github actions.
+Follow the steps below:
+
+### Github IAM Role
+Deploying via Github actions needs read/write access to several AWS services, 
+among which are S3, ECS, IAM, RDS, SSM (Parameter Store).
+
+#### OpenID Connect Setup
+> FILLME
+
+#### GithubDeploymentRole Permissions
+> FILLME
+
+### 🔹 Database Backend Setup
+> Save your created credentials
+
+#### Start RDS PostgreSQL
+> FILLME \
+> \# ensure that it's (only) accessible by your EC2 instances SG (see below)
+
+#### Temporary EC2 connector
+> FILLME 
+> \# use this to populate your db with the following instructions
+
+## Architecture
+![Architecture Diagram.png](docs/Architecture%20Diagram.png)
+
 ## 📖 Usage
 
-- Access the application at [http://localhost:5000](http://localhost:5000)
+- Access the application at either [http://localhost:5001](http://localhost:5001) or [http:/<FARGATE_IP>:5001](http://<FARGATE_IP:5001)
 - Register/Login to your account
 - Browse and search for products
 - Manage favorites and shopping basket
 - Proceed through the checkout process
-
-## 🤝 Contributing
-
-We welcome contributions! Please follow these steps:
-
-1. Fork the repository.
-2. Create a new feature branch (`feature/your-feature`).
-3. Implement your changes and commit them.
-4. Push your branch and create a pull request.
 
 ## 📜 License
 
