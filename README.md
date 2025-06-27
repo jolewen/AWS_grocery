@@ -197,20 +197,23 @@ In this case, use a temporary EC2 instance and seed the db as described.
 2. Run an EC2 instance with the following user data (or install psql manually).
   ```bash
   sudo yum update -y
-  sudo yum install -y postgresql15
+  sudo yum install -y postgresql15 git
   ```
-3. Log into the instance and use the commands above to setup the db as you would locally, but specify the RDS as host. Example:
+3. Log into the instance and use the commands above to
+   a) set up the db as you would locally, but specify the RDS as host.
+   b) clone this repo into and prefill the db. 
+  Example:
   ```bash
   psql -h webstore-pg.czckmkgc6alw.eu-central-1.rds.amazonaws.com -U postgres -c "CREATE DATABASE grocerymate_db;"
   ```
 4. Save your credentials (+ port & db name) to GitHub vars.
 5. Take an RDS snapshot.
 6. Enter the snapshot name into [terraform](./terraform/rds.tf).
-7. Tear down on AWS (e.g. EC2 & RDS).
+7. Tear down on AWS (e.g., EC2 & RDS).
 
 #### RDS Configuration
 Terraform configures RDS and its related resources with the following
-* Private subnet deployment - no public access.
+* Private subnet deployment—no public access.
 * Accessible only by your app's SecurityGroup.
 * Single-Zone AZ deployment, due to recreation from snapshot.
 
@@ -223,7 +226,12 @@ Variables needed:
 * POSTGRES_PORT
 * POSTGRES_USER
 * POSTGRES_PWD
-Also ensure to replace the VPC & subnet ids as well as the aws-region with the appropriate ones from your AWS account. 
+
+Also, make sure to replace the VPC & subnet ids as well as the aws-region with the appropriate ones from your AWS account.
+In addition, uncomment the var.db_username and var.db_password variable usage in [the RDS definition](./terraform/rds.tf). 
+
+Finally, you should be good to go! 🚀
+
 
 ## Architecture Diagram
 ![Architecture Diagram.png](docs/Architecture%20Diagram.png)
