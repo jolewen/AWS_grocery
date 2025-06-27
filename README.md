@@ -77,7 +77,6 @@ git clone --branch main https://github.com/jolewen/AWS_grocery.git && cd AWS_gro
 ```
 
 #### Configure PostgreSQL
-
 Before creating the database user, you can choose a custom username and password
 to enhance security. Replace `<your_secure_password>` with a strong password of
 your choice in the following commands.
@@ -168,10 +167,16 @@ Deploying via Github actions needs read/write access to several AWS services,
 among which are S3, ECS, IAM, RDS, SSM (Parameter Store).
 
 #### OpenID Connect Setup
-> FILLME
+In order for Github (actions) to be allowed to interact with your AWS Account
+the recommended way is to configure an "OpenID Connect (OIDC) identity provider (IdP) inside an AWS account, 
+[and] use IAM roles and short-term credentials, which removes the need for IAM user access keys" ([source: Github](https://docs.github.com/en/actions/concepts/security/about-security-hardening-with-openid-connect))
 
-#### GithubDeploymentRole Permissions
-> FILLME
+Click this link and follow the instructions: [OpenID Connect: AWS-Github](https://aws.amazon.com/blogs/security/use-iam-roles-to-connect-github-actions-to-actions-in-aws/)
+
+#### Github Deployment Role Permissions
+Assuming you have set up Github to request a short-lived access token directly from the cloud provider (see above)
+you will have to assign permissions to your Github deployment role (Gdr).
+Which 
 
 ### 🔹 Database Backend Setup
 > Save your created credentials
@@ -180,9 +185,11 @@ among which are S3, ECS, IAM, RDS, SSM (Parameter Store).
 > FILLME \
 > \# ensure that it's (only) accessible by your EC2 instances SG (see below)
 
-#### Temporary EC2 connector
-> FILLME 
-> \# use this to populate your db with the following instructions
+#### Seed the Database
+If you are setting up the app for the first time you will not have a snapshot to restore 
+the RDS databse from. In this case, use a temporary EC2 instance and seed the db 
+as described above. 
+Then create a snapshot of your db, so that you can safely terminate it (cost saving).
 
 ## Architecture
 ![Architecture Diagram.png](docs/Architecture%20Diagram.png)
