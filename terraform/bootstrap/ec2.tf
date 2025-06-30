@@ -68,7 +68,18 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
 
 
 ### --------- EC2 definition --------- ###
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+}
+
 resource "aws_instance" "webserver" {
+  ami = data.aws_ami.amazon_linux.id
   instance_type = var.ec2_instance_type
   key_name = aws_key_pair.ec2_key.key_name
   iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
