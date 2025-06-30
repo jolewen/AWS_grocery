@@ -227,7 +227,7 @@ Additionally, it will push the Postgres' *username*, *(encrypted) password*, *ho
 These will be filled from your provided GitHub variables.
 
 #### 🏃 **Step by step - RDS seeding**:
-1. Save your [credentials](#-from-github-to-aws) as GitHub variables and ensure that the [GitHub](.github/workflows/aws-bootstrap.yml)[actions](.github/workflows/aws-deployment.yml) use them.
+1. Save your RDS credentials (see above "From GitHub to AWS") as GitHub variables and ensure that the [GitHub ](.github/workflows/aws-bootstrap.yml)[actions](.github/workflows/aws-deployment.yml) use them.
 2. Run the [Boostrap Action](./.github/workflows/aws-bootstrap.yml). It will:
    1. Boot up RDS with PostgreSQL version ~=15.13 on AWS. 
    2. Run an EC2 instance with *git* and *psql* being pre-installed via the user data.
