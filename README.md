@@ -198,10 +198,9 @@ Terraform is set up to use S3 as backend to store its state.
 ### 🗄️☁️ From GitHub to AWS
 Use GitHub variables to define parameters that will be injected into the application.
 Please use the following recommended values:
-* POSTGRES_DB=grocerymate_db
-* POSTGRES_PORT=5432
-* POSTGRES_USER=grocery_user
-* POSTGRES_PWD=\<your-password\>
+> * POSTGRES_DB=grocerymate_db
+> * POSTGRES_USER=grocery_user
+> * POSTGRES_PWD=\<your-password\>
 
 Deploying via GitHub actions needs read/write access to several AWS services, 
 among which are S3, ECS, IAM, RDS, SSM (Parameter Store). 
@@ -223,40 +222,39 @@ Thus - even though it does not follow least-privilege - consider granting Admini
 If you are deploying the app for the first time, you will not have a snapshot to restore the RDS databse from. 
 For this case, a bootstrapping action has been provided.
 It will create temporary resources such as an EC2 and RDS PostgreSQL15 instance, as well as the corresponding Security Groups.
-Additionally, it will push the Postgres' *username*, *(encrypted) password*, *host*, *port* and *db name* into AWS's Systems Manager - Parameter Store.
+Additionally, it will push the Postgres' *username*, *password* (will be encrypted automatically), *host* (from terraform output), *port* (default 5432) and *db name* into AWS's Systems Manager - Parameter Store.
 These will be filled from your provided GitHub variables.
 
 #### 🏃 **Step by step - RDS seeding**:
 1. Save your RDS credentials (see above "From GitHub to AWS") as GitHub variables and ensure that the [GitHub ](.github/workflows/aws-bootstrap.yml)[actions](.github/workflows/aws-deployment.yml) use them.
-2. Run the [Boostrap Action](./.github/workflows/aws-bootstrap.yml). It will:
-   1. Boot up RDS with PostgreSQL version ~=15.13 on AWS. 
-   2. Run an EC2 instance with *git* and *psql* being pre-installed via the user data.
-   3. Store PG data (username, password, db name, host, port) an AWS SSM. 
+2. Run the [Boostrap Action](./.github/workflows/aws-bootstrap.yml). It will automatically
+   1. boot up RDS with PostgreSQL version ~=15.13 on AWS
+   2. run an EC2 instance with *git* and *psql* pre-installed via the user data script
+   3. store PG data (username, password, db name, host, port) an AWS SSM
 3. Log into the EC2 instance and use commands like [above](#populate-database) to
-   1. clone this repo. ```git clone --branch main https://github.com/jolewen/AWS_grocery.git && cd AWS_grocery```
+   1. clone this repo: ```git clone --branch main https://github.com/jolewen/AWS_grocery.git && cd AWS_grocery```
    2. set up the db as you would locally, but specify the RDS as host: ```psql -h <your-db-name>.eu-central-1.rds.amazonaws.com -U postgres -d grocerymate_db -f AWS_grocery/backend/db_backup/sqlite_dump_clean.sql```
-4. From EC2, log into the db and verify that a table *public.products* exists and contains data. 
+4. From EC2, log into the db and verify that a table called *public.products* exists and contains data. 
 5. Take an RDS snapshot.
-6. Enter the snapshot name into [terraform](./terraform/rds.tf) (recommendation is to call it the same as the db)
+6. Enter the snapshot's name into [terraform](./terraform/rds.tf) (recommendation is to call it the same as the db)
 7. Tear down on AWS (EC2 & RDS, SGs, etc.) — DO NOT REMOVE THE SNAPSHOT.
 
 #### RDS Configuration
-Terraform configures RDS and its related resources with the following
-* Private subnet deployment—no public access.
+Terraform configures RDS and its related resources with the following configuration
+* Private deployment—no public access.
 * Accessible only by your app's SecurityGroup.
-* Single-Zone AZ deployment, due to recreation from snapshot.
+* Single-Zone AZ deployment.
 
 
 ### 🧱 Run AWS Deployment
 **Environment**\
 Before running the [GitHub action - "AWS Deployment Workflow"](./.github/workflows/aws-deployment.yml):
-Again, ensure that you have set all variables as GitHub variables / secrets and enabled the pipeline to access them.
-Do not change them between bootstrapping and application deployment!
+Again, ensure that you have set all variables as GitHub variables and enabled the pipeline to access them.
+Do not change these parameters between bootstrapping and application deployment!
 To reiterate the required variables are:
-* POSTGRES_DB=grocerymate_db
-* POSTGRES_PORT=5432
-* POSTGRES_USER=grocery_user
-* POSTGRES_PWD=\<your-password\>
+> * POSTGRES_DB=grocerymate_db
+> * POSTGRES_USER=grocery_user
+> * POSTGRES_PWD=\<your-password\>
 
 These should not be changed from the bootstrapping if applied. 
 
