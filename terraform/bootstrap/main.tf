@@ -8,7 +8,7 @@ terraform {
   backend "s3" {
     bucket  = "terraform.bucket.jle"
     key     = "bootstrap/terraform.tfstate"
-    region  = var.aws_region
+    region  = "eu-central-1"
     encrypt = true
   }
 }
