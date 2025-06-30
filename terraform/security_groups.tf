@@ -1,5 +1,5 @@
 resource "aws_security_group" "webstore-sg" {
-  name        = "webstore_sg"
+  name        = "webstore-sg"
   description = "SG for EC2 instance"
   vpc_id      = var.vpc_id
 
@@ -25,7 +25,7 @@ resource "aws_security_group" "webstore-sg" {
 }
 
 resource "aws_security_group" "rds-sg" {
-  name        = "rds_sg"
+  name        = "rds-sg"
   description = "SG for RDS, allowing only EC2 SG"
   vpc_id      = var.vpc_id
 
