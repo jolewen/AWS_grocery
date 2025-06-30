@@ -178,6 +178,7 @@ The *grocerymate webstore* application has been packaged into a Docker image.
 This allows deployment without concern for dependencies or virtualization.
 The image is available in the GitHub Container Registry under *ghcr.io/jolewen/grocery_webstore*.
 In case you need to make adjustments feel free to adapt the [Dockerfile](./backend/Dockerfile) to your needs, and create an image in your own repository.
+If so, please generate and store a JWT token (see above) in your actions' GitHub variables.
 
 
 ## ☁️ AWS Deployment
@@ -226,17 +227,17 @@ Additionally, it will push the Postgres' *username*, *(encrypted) password*, *ho
 These will be filled from your provided GitHub variables.
 
 #### 🏃 **Step by step - RDS seeding**:
-1. Save your credentials (+ port & db name) to GitHub variables and ensure that the action uses them.
+1. Save your [credentials](#-from-github-to-aws) as GitHub variables and ensure that the [GitHub](.github/workflows/aws-bootstrap.yml)[actions](.github/workflows/aws-deployment.yml) use them.
 2. Run the [Boostrap Action](./.github/workflows/aws-bootstrap.yml). It will:
    1. Boot up RDS with PostgreSQL version ~=15.13 on AWS. 
    2. Run an EC2 instance with *git* and *psql* being pre-installed via the user data.
    3. Store PG data (username, password, db name, host, port) an AWS SSM. 
-3. Log into the instance and use the commands above to
+3. Log into the EC2 instance and use commands like [above](#populate-database) to
    1. clone this repo. ```git clone --branch main https://github.com/jolewen/AWS_grocery.git && cd AWS_grocery```
    2. set up the db as you would locally, but specify the RDS as host: ```psql -h <your-db-name>.eu-central-1.rds.amazonaws.com -U postgres -d grocerymate_db -f AWS_grocery/backend/db_backup/sqlite_dump_clean.sql```
 4. From EC2, log into the db and verify that a table *public.products* exists and contains data. 
 5. Take an RDS snapshot.
-6. Enter the snapshot name into [terraform](./terraform/rds.tf) (recomendation is to call it the same as the db)
+6. Enter the snapshot name into [terraform](./terraform/rds.tf) (recommendation is to call it the same as the db)
 7. Tear down on AWS (EC2 & RDS, SGs, etc.) — DO NOT REMOVE THE SNAPSHOT.
 
 #### RDS Configuration
