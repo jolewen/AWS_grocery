@@ -1,5 +1,5 @@
-resource "aws_security_group" "webstore_sg" {
-  name        = "webstore_sg"
+resource "aws_security_group" "webstore-sg" {
+  name        = "webstore-sg"
   description = "SG for EC2 instance"
   vpc_id      = var.vpc_id
 
@@ -24,8 +24,8 @@ resource "aws_security_group" "webstore_sg" {
   }
 }
 
-resource "aws_security_group" "rds_sg" {
-  name        = "rds_sg"
+resource "aws_security_group" "rds-sg" {
+  name        = "rds-sg"
   description = "SG for RDS, allowing only EC2 SG"
   vpc_id      = var.vpc_id
 
@@ -33,7 +33,7 @@ resource "aws_security_group" "rds_sg" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    security_groups = [aws_security_group.webstore_sg.id]
+    security_groups = [aws_security_group.webstore-sg.id]
     description = "PostgreSQL from EC2"
   }
 

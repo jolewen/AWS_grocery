@@ -13,7 +13,7 @@ resource "aws_db_instance" "postgres" {
   delete_automated_backups = true
 
   # Networking
-  vpc_security_group_ids = [aws_security_group.rds_sg.id]
+  vpc_security_group_ids = [aws_security_group.rds-sg.id]
   db_subnet_group_name = var.db_subnet_group
   multi_az             = false
   storage_encrypted    = true

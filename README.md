@@ -92,7 +92,7 @@ psql -U postgres -c "ALTER USER grocery_user WITH SUPERUSER;"
 #### Populate Database
 
 ```sh
-psql -U grocery_user -d grocerymate_db -f backend/app/sqlite_dump_clean.sql
+psql -U grocery_user -d grocerymate_db -f backend/db_backups/sqlite_dump_clean.sql
 ```
 
 Verify insertion:
@@ -156,25 +156,39 @@ POSTGRES_URI = postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOS
 python3 run.py
 ```
 
+## 📦 Containerization
+The *grocerymate webstore* application has been packaged into a Docker image.
+This allows deployment without concern for dependencies or virtualization.
+The image is available in the GitHub Container Registry under *ghcr.io/jolewen/grocery_webstore*.
+In case you need to make adjustments feel free to adapt the [Dockerfile](./backend/Dockerfile) to your needs, and create an image in your own repository.
 
 
 ## ☁️ AWS Deployment
 This repo's version of grocerymate has been adapted to be deployed to AWS.
 To this end, a GitHub action will containerize the code as defined by the [Dockerfile](./backend/Dockerfile).
 The resulting image is stored in the GitHub container registry (ghcr.io).
-
+To deploy the application correctly, a [bootstap action](./.github/workflows/aws-bootstrap.yml) needs to be run if starting fresh.
+Followed by seeding of the database, tear down and actual deployment. 
+Please follow the steps below.
 
 ### 📋 Prerequisites
-All necessary infrastructure is defined via [terraform](./terraform). 
-Terraform is set up to use S3 as backend to store its state. Create the S3 bucket and [enter its name here](./terraform/providers.tf) under "backend".
-Deploying the grocerymate webstore needs a manual bootstrapping process to populate the RDS.
+All necessary AWS infrastructure components are defined via [terraform](https://registry.terraform.io/providers/hashicorp/aws/latest/docs). 
+Terraform is set up to use S3 as backend to store its state. 
+* Create the S3 bucket and [enter its name here](./terraform/main.tf) under "backend".
+* Deploying the grocerymate webstore needs manual interaction in a bootstrapping process to populate the RDS.
 
+### 🗄️☁️ From GitHub to AWS
+Use GitHub variables to define parameters that will be injected into the application.
+Please use the following recommended values:
+* POSTGRES_DB=grocerymate_db
+* POSTGRES_PORT=5432
+* POSTGRES_USER=grocery_user
+* POSTGRES_PWD=<your-password>
 
-### 🔄☁️ GitHub to AWS 
 Deploying via GitHub actions needs read/write access to several AWS services, 
 among which are S3, ECS, IAM, RDS, SSM (Parameter Store). 
 
-#### OpenID Connect Setup
+#### 🔄 OpenID Connect Setup
 In order for GitHub (actions) to be allowed to interact with your AWS Account,
 the recommended way is to configure an "OpenID Connect (OIDC) identity provider (IdP) inside an AWS account, 
 [and] use IAM roles and short-term credentials, which removes the need for IAM user access keys" ([source: GitHub](https://docs.github.com/en/actions/concepts/security/about-security-hardening-with-openid-connect))
@@ -183,33 +197,30 @@ Click this link and follow the instructions: [OpenID Connect: AWS-GitHub](https:
 
 #### 🧑‍🔧 GitHub Deployment Role Permissions
 Assuming you have set up GitHub to request a short-lived access token directly from the cloud provider (see above)
-you will have to assign permissions to your GitHub deployment role (Gdr). As already mentioned, several and widespread permissions have to be granted.
+you will have to assign permissions to your GitHub deployment role. As already mentioned, several and widespread permissions have to be granted.
 For the purpose of this documentation, it is assumed that your GitHub is the representation of yourself when deploying infrastructure to AWS.
 Thus - even though it does not follow least-privilege - consider granting AdministratorAccess (*arn:aws:iam::aws:policy/AdministratorAccess*).
 
-
-### 🔹 Database Backend Setup
+### 👢 Bootstrapping first deployment
 If you are deploying the app for the first time, you will not have a snapshot to restore the RDS databse from. 
-In this case, use a temporary EC2 instance and seed the db as described.
+For this case, a [bootstrapping action has been provided](./.github/workflows/aws-bootstrap.yml).
+It will create temporary resources such as an EC2 and RDS PostgreSQL15 instance, as well as the corresponding Security Groups.
+Additionally, it will push the Postgres' *username*, *(encrypted) password*, *host*, *port* and *db name* into AWS's Systems Manager - Parameter Store.
+These will be filled from your provided GitHub variables.
 
-#### **Step by step - RDS seeding**:
-1. Boot up RDS with PostgreSQL version ~=15 on AWS—use the configuration in [terraform](./terraform/rds.tf) without restoring from a snapshot.
-2. Run an EC2 instance with the following user data (or install psql manually).
-  ```bash
-  sudo yum update -y
-  sudo yum install -y postgresql15 git
-  ```
+#### 🏃 **Step by step - RDS seeding**:
+1. Save your credentials (+ port & db name) to GitHub variables and ensure that the action uses them.
+2. Run the [Boostrap Action](./.github/workflows/aws-bootstrap.yml). It will:
+   1. Boot up RDS with PostgreSQL version ~=15.13 on AWS. 
+   2. Run an EC2 instance with *git* and *psql* being pre-installed via the user data.
+   3. Store PG data (username, password, db name, host, port) an AWS SSM. 
 3. Log into the instance and use the commands above to
-   a) set up the db as you would locally, but specify the RDS as host.
-   b) clone this repo into and prefill the db. 
-  Example:
-  ```bash
-  psql -h webstore-pg.czckmkgc6alw.eu-central-1.rds.amazonaws.com -U postgres -c "CREATE DATABASE grocerymate_db;"
-  ```
-4. Save your credentials (+ port & db name) to GitHub vars.
+   1. clone this repo. ```git clone --branch main https://github.com/jolewen/AWS_grocery.git && cd AWS_grocery```
+   2. set up the db as you would locally, but specify the RDS as host: ```psql -h <your-db-name>.eu-central-1.rds.amazonaws.com -U postgres -d grocerymate_db -f AWS_grocery/backend/db_backup/sqlite_dump_clean.sql```
+4. From EC2, log into the db and verify that a table *public.products* exists and contains data. 
 5. Take an RDS snapshot.
-6. Enter the snapshot name into [terraform](./terraform/rds.tf).
-7. Tear down on AWS (e.g., EC2 & RDS).
+6. Enter the snapshot name into [terraform](./terraform/rds.tf) (recomendation is to call it the same as the db)
+7. Tear down on AWS (EC2 & RDS, SGs, etc.) — DO NOT REMOVE THE SNAPSHOT.
 
 #### RDS Configuration
 Terraform configures RDS and its related resources with the following
@@ -218,22 +229,25 @@ Terraform configures RDS and its related resources with the following
 * Single-Zone AZ deployment, due to recreation from snapshot.
 
 
-### Deployment
+### 🧱 Deployment
+**Environment**\
 Before running the [GitHub action - "AWS Deployment Workflow"](./.github/workflows/aws-deployment.yml):
 Ensure that you have set all variables as GitHub variables / secrets and enabled the pipeline to access them.
-Variables needed:
-* POSTGRES_DB
-* POSTGRES_PORT
-* POSTGRES_USER
-* POSTGRES_PWD
+Variables needed are:
+* POSTGRES_DB=grocerymate_db
+* POSTGRES_PORT=5432
+* POSTGRES_USER=grocery_user
+* POSTGRES_PWD=<your-password>
 
+These should not be changed from the bootstrapping if applied. 
+
+**VPC**\
 Also, make sure to replace the VPC & subnet ids as well as the aws-region with the appropriate ones from your AWS account.
-In addition, uncomment the var.db_username and var.db_password variable usage in [the RDS definition](./terraform/rds.tf). 
 
 Finally, you should be good to go! 🚀
 
 
-## Architecture Diagram
+## 🌉 Architecture Diagram
 ![Architecture Diagram.png](docs/Architecture%20Diagram.png)
 
 

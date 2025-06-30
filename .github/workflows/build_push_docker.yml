@@ -12,7 +12,7 @@ jobs:
         environment: webstore-deployment
         env:
           IMAGE_NAME: grocery_webstore
-          IMAGE_TAG: fargate
+          IMAGE_TAG: latest
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
         steps:
           - name: 'Checkout GitHub Action'

@@ -68,11 +68,16 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
 
 
 ### --------- EC2 definition --------- ###
+data "aws_ssm_parameter" "al2023" {
+  name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
+}
+
 resource "aws_instance" "webserver" {
+  ami = data.aws_ssm_parameter.al2023.value
   instance_type = var.ec2_instance_type
   key_name = aws_key_pair.ec2_key.key_name
   iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
-  vpc_security_group_ids = [aws_security_group.webstore_sg.id]
+  vpc_security_group_ids = [aws_security_group.webstore_sg_temp.id]
 
   user_data = <<-EOF
   #!/bin/bash
