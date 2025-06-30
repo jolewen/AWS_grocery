@@ -1,6 +1,5 @@
 name: AWS Bootstrap Workflow
 on:
-  - push
   - workflow_dispatch
 
 permissions:

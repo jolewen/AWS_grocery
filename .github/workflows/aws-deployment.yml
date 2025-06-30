@@ -1,5 +1,6 @@
 name: AWS Deployment Workflow
 on:
+  - push
   - workflow_dispatch
 
 permissions:

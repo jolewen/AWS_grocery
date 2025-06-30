@@ -92,7 +92,7 @@ psql -U postgres -c "ALTER USER grocery_user WITH SUPERUSER;"
 #### Populate Database
 
 ```sh
-psql -U grocery_user -d grocerymate_db -f backend/app/sqlite_dump_clean.sql
+psql -U grocery_user -d grocerymate_db -f backend/db_backups/sqlite_dump_clean.sql
 ```
 
 Verify insertion:
@@ -162,7 +162,6 @@ python3 run.py
 This repo's version of grocerymate has been adapted to be deployed to AWS.
 To this end, a GitHub action will containerize the code as defined by the [Dockerfile](./backend/Dockerfile).
 The resulting image is stored in the GitHub container registry (ghcr.io).
-
 
 ### 📋 Prerequisites
 All necessary infrastructure is defined via [terraform](./terraform). 
