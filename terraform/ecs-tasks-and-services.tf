@@ -43,7 +43,7 @@ resource "aws_ecs_service" "grocerymate" {
 
   network_configuration {
     subnets          = var.subnet_ids
-    security_groups = [aws_security_group.webstore_sg.id]
+    security_groups = [aws_security_group.webstore-sg.id]
     assign_public_ip = true
   }
 
