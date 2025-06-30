@@ -14,17 +14,27 @@
 
 - [Overview](#-overview)
 - [Features](#-features)
+- [Usage](#-usage)
 - [Screenshots & Demo](#-screenshots--demo)
 - [Prerequisites](#-prerequisites)
-- [Installation](#-installation)
+- [Local Installation](#-installation)
     - [Clone Repository](#-clone-repository)
     - [Configure PostgreSQL](#-configure-postgresql)
     - [Populate Database](#-populate-database)
     - [Set Up Python Environment](#-set-up-python-environment)
     - [Set Environment Variables](#-set-environment-variables)
     - [Start the Application](#-start-the-application)
-- [Usage](#-usage)
-- [Contributing](#-contributing)
+- [Containerization](#-containerization)
+- [Deployment to AWS](#-aws-deployment)
+  - [From GitHub to AWS](#-from-github-to-aws)
+    - [OIDC Setup](#-openid-connect-setup)
+    - [GitHub Authorization](#-github-deployment-role-permissions)
+  - [Bootstrap](#-bootstrapping-first-deployment)
+    - [Step-by-step](#-step-by-step---rds-seeding)
+    - [RDS Configuration](#rds-configuration)
+  - [Run AWS Deployment](#-run-aws-deployment)
+- [Architecture](#-architecture-diagram)
+
 - [License](#-license)
 
 ## 🚀 Overview
@@ -50,11 +60,19 @@ products, manage their shopping basket, and complete purchases efficiently.
     - Multiple payment options.
     - Automatic total price calculation.
 
+## 📖 Usage
+
+- Access the application at either [http://localhost:5001](http://localhost:5001) or [http:/<FARGATE_IP>:5001](http://<FARGATE_IP:5001)
+- Register/Login to your account
+- Browse and search for products
+- Manage favorites and shopping basket
+- Proceed through the checkout process
+
+
 ## 📸 Screenshots & Demo
 
 ![imagen](https://github.com/user-attachments/assets/ea039195-67a2-4bf2-9613-2ee1e666231a)
 ![imagen](https://github.com/user-attachments/assets/a87e5c50-5a9e-45b8-ad16-2dbff41acd00)
-![imagen](https://github.com/user-attachments/assets/589aae62-67ef-4496-bd3b-772cd32ca386)
 ![imagen](https://github.com/user-attachments/assets/2772b85e-81f7-446a-9296-4fdc2b652cb7)
 
 https://github.com/user-attachments/assets/d1c5c8e4-5b16-486a-b709-4cf6e6cce6bc
@@ -147,7 +165,6 @@ POSTGRES_PASSWORD = <your_password>
 POSTGRES_DB = grocerymate_db
 POSTGRES_HOST = localhost
 POSTGRES_PORT = 5432
-POSTGRES_URI = postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:5432/${POSTGRES_DB}
 ```
 
 ### 🔹 Start the Application
@@ -229,7 +246,7 @@ Terraform configures RDS and its related resources with the following
 * Single-Zone AZ deployment, due to recreation from snapshot.
 
 
-### 🧱 Deployment
+### 🧱 Run AWS Deployment
 **Environment**\
 Before running the [GitHub action - "AWS Deployment Workflow"](./.github/workflows/aws-deployment.yml):
 Ensure that you have set all variables as GitHub variables / secrets and enabled the pipeline to access them.
@@ -249,15 +266,6 @@ Finally, you should be good to go! 🚀
 
 ## 🌉 Architecture Diagram
 ![Architecture Diagram.png](docs/Architecture%20Diagram.png)
-
-
-## 📖 Usage
-
-- Access the application at either [http://localhost:5001](http://localhost:5001) or [http:/<FARGATE_IP>:5001](http://<FARGATE_IP:5001)
-- Register/Login to your account
-- Browse and search for products
-- Manage favorites and shopping basket
-- Proceed through the checkout process
 
 
 ## 📜 License
