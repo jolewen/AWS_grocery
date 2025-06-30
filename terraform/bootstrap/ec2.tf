@@ -69,7 +69,7 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
 
 ### --------- EC2 definition --------- ###
 data "aws_ssm_parameter" "al2023" {
-  name = "/aws/service/ami‑amazon‑linux‑latest/al2023‑ami‑kernel‑default‑x86_64"
+  name = "/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 }
 
 resource "aws_instance" "webserver" {
