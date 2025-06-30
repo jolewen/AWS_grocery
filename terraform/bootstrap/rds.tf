@@ -8,8 +8,7 @@ resource "aws_db_instance" "postgres" {
   username            = var.db_username
   password            = var.db_password
   publicly_accessible = false
-  snapshot_identifier = "grocerymate-pg"
-  skip_final_snapshot = true
+  skip_final_snapshot = false
   delete_automated_backups = true
 
   # Networking

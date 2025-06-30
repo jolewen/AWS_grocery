@@ -1,0 +1,9 @@
+variable "db_identifier" {}
+variable "db_instance_class" {}
+variable "db_name" {}
+variable "db_username" {}
+variable "db_password" {}
+variable "db_subnet_group" {}
+variable "vpc_id" {}
+variable "aws_region" {}
+variable "ec2_instance_type" {}
