@@ -178,14 +178,14 @@ The *grocerymate webstore* application has been packaged into a Docker image.
 This allows deployment without concern for dependencies or virtualization.
 The image is available in the GitHub Container Registry under *ghcr.io/jolewen/grocery_webstore*.
 In case you need to make adjustments feel free to adapt the [Dockerfile](./backend/Dockerfile) to your needs, and create an image in your own repository.
-If so, please generate and store a JWT token (see above) in your actions' GitHub variables.
+If so, please generate and store a *JWT token* (see above) in your actions' GitHub variables.
 
 
 ## ☁️ AWS Deployment
 This repo's version of grocerymate has been adapted to be deployed to AWS, specifically to run on a Fargate ECS cluster.
 To this end, a GitHub action will containerize the code as defined by the [Dockerfile](./backend/Dockerfile).
 The resulting image is stored in the GitHub container registry (ghcr.io).
-To deploy the application correctly, a [bootstap action](./.github/workflows/aws-bootstrap.yml) needs to be run if starting fresh.
+To deploy the application correctly, a [bootstrap action](./.github/workflows/aws-bootstrap.yml) needs to be run if starting fresh.
 Followed by seeding of the database, tear down and actual deployment. 
 Please follow the steps below.
 
@@ -221,7 +221,7 @@ Thus - even though it does not follow least-privilege - consider granting Admini
 
 ### 👢 Bootstrapping first deployment
 If you are deploying the app for the first time, you will not have a snapshot to restore the RDS databse from. 
-For this case, a [bootstrapping action has been provided](./.github/workflows/aws-bootstrap.yml).
+For this case, a bootstrapping action has been provided.
 It will create temporary resources such as an EC2 and RDS PostgreSQL15 instance, as well as the corresponding Security Groups.
 Additionally, it will push the Postgres' *username*, *(encrypted) password*, *host*, *port* and *db name* into AWS's Systems Manager - Parameter Store.
 These will be filled from your provided GitHub variables.
