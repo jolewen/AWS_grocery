@@ -201,7 +201,7 @@ Please use the following recommended values:
 * POSTGRES_DB=grocerymate_db
 * POSTGRES_PORT=5432
 * POSTGRES_USER=grocery_user
-* POSTGRES_PWD=<your-password>
+* POSTGRES_PWD=\<your-password\>
 
 Deploying via GitHub actions needs read/write access to several AWS services, 
 among which are S3, ECS, IAM, RDS, SSM (Parameter Store). 
@@ -250,12 +250,13 @@ Terraform configures RDS and its related resources with the following
 ### 🧱 Run AWS Deployment
 **Environment**\
 Before running the [GitHub action - "AWS Deployment Workflow"](./.github/workflows/aws-deployment.yml):
-Ensure that you have set all variables as GitHub variables / secrets and enabled the pipeline to access them.
-Variables needed are:
+Again, ensure that you have set all variables as GitHub variables / secrets and enabled the pipeline to access them.
+Do not change them between bootstrapping and application deployment!
+To reiterate the required variables are:
 * POSTGRES_DB=grocerymate_db
 * POSTGRES_PORT=5432
 * POSTGRES_USER=grocery_user
-* POSTGRES_PWD=<your-password>
+* POSTGRES_PWD=\<your-password\>
 
 These should not be changed from the bootstrapping if applied. 
 
