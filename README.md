@@ -193,7 +193,7 @@ If you are deploying the app for the first time, you will not have a snapshot to
 In this case, use a temporary EC2 instance and seed the db as described.
 
 #### **Step by step - RDS seeding**:
-1. Boot up RDS with PostgreSQL version ~=15 on AWS - use the configuration in [terraform](./terraform/rds.tf) without restoring from a snapshot.
+1. Boot up RDS with PostgreSQL version ~=15 on AWS—use the configuration in [terraform](./terraform/rds.tf) without restoring from a snapshot.
 2. Run an EC2 instance with the following user data (or install psql manually).
   ```bash
   sudo yum update -y
