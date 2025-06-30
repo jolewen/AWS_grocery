@@ -17,7 +17,6 @@ jobs:
       TF_VAR_aws_region: "eu-central-1"
       TF_VAR_vpc_id: "vpc-02b0cb05f448d2882"
       TF_VAR_subnet_ids: '[ "subnet-0185a7f112cd61262", "subnet-045923f8e41d39e3e", "subnet-02a1320e66b8555de" ]'
-      TF_VAR_instance_type: "t2.micro"
       TF_VAR_db_identifier: "grocerymate-pg"
       TF_VAR_db_instance_class: "db.t3.micro"
       TF_VAR_db_name: ${{ secrets.POSTGRES_DB }}

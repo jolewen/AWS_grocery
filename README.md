@@ -182,7 +182,7 @@ If so, please generate and store a JWT token (see above) in your actions' GitHub
 
 
 ## ☁️ AWS Deployment
-This repo's version of grocerymate has been adapted to be deployed to AWS.
+This repo's version of grocerymate has been adapted to be deployed to AWS, specifically to run on a Fargate ECS cluster.
 To this end, a GitHub action will containerize the code as defined by the [Dockerfile](./backend/Dockerfile).
 The resulting image is stored in the GitHub container registry (ghcr.io).
 To deploy the application correctly, a [bootstap action](./.github/workflows/aws-bootstrap.yml) needs to be run if starting fresh.
