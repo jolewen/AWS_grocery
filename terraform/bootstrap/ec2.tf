@@ -77,7 +77,7 @@ resource "aws_instance" "webserver" {
   instance_type = var.ec2_instance_type
   key_name = aws_key_pair.ec2_key.key_name
   iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
-  vpc_security_group_ids = [aws_security_group.webstore_sg.id]
+  vpc_security_group_ids = [aws_security_group.webstore_sg_temp.id]
 
   user_data = <<-EOF
   #!/bin/bash

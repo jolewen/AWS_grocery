@@ -1,5 +1,5 @@
-resource "aws_security_group" "webstore_sg" {
-  name        = "webstore_sg"
+resource "aws_security_group" "webstore_sg_temp" {
+  name        = "webstore_sg_temp"
   description = "SG for grocerymate webserver instance"
   vpc_id      = var.vpc_id
 
@@ -24,8 +24,8 @@ resource "aws_security_group" "webstore_sg" {
   }
 }
 
-resource "aws_security_group" "rds_sg" {
-  name        = "rds_sg"
+resource "aws_security_group" "rds_sg_temp" {
+  name        = "rds_sg_temp"
   description = "SG for RDS, allowing inbound traffic only from grocerymate webserver SG"
   vpc_id      = var.vpc_id
 
@@ -33,7 +33,7 @@ resource "aws_security_group" "rds_sg" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    security_groups = [aws_security_group.webstore_sg.id]
+    security_groups = [aws_security_group.webstore_sg_temp.id]
     description = "PostgreSQL from grocerymate"
   }
 
