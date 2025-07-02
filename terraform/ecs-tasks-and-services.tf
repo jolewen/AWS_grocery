@@ -11,10 +11,10 @@ resource "aws_ecs_task_definition" "grocerymate_fargate" {
     {
       name  = "grocerymate"
       image = "ghcr.io/jolewen/grocery_webstore:fargate"
+      essential = true
       portMappings = [
         {
           containerPort = 5001
-          hostPort      = 5001
         }
       ]
       logConfiguration = {
@@ -49,6 +49,12 @@ resource "aws_ecs_service" "grocerymate" {
 
   deployment_controller {
     type = "ECS"
+  }
+
+  load_balancer {
+    target_group_arn = aws_alb_target_group.grocerymate-tg.arn
+    container_name = "grocerymate"
+    container_port = 5001
   }
 }
 
